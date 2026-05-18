@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
+trap 'rm -rf "$TMP_DIR" "$ROOT_DIR/bad-relative-master"' EXIT
 
 export HOME="$TMP_DIR/home"
 export SKILLMASTER_CONFIG="$HOME/.skillmaster/config"
@@ -157,12 +157,29 @@ test_interactive_default_uses_home_skills() {
   reset_env
   write_skill "$CLAUDE" "default-import" "description: Default Import"
 
-  printf ' Default \n' | "$ROOT_DIR/setup.sh" --claude "$CLAUDE" --codex "$CODEX" --no-service
+  printf '\n' | "$ROOT_DIR/setup.sh" --claude "$CLAUDE" --codex "$CODEX" --no-service > "$TMP_DIR/default-setup.out"
 
   assert_contains "$SKILLMASTER_CONFIG" "MASTER_DIR=\"$HOME/skills\""
   assert_file "$HOME/skills/default-import/SKILL.md"
   assert_file "$HOME/skills/index.html"
+  assert_contains "$TMP_DIR/default-setup.out" "Press Enter to use the default"
+  assert_contains "$TMP_DIR/default-setup.out" "paste the full absolute filepath"
   assert_not_exists "$ROOT_DIR/default"
+}
+
+test_interactive_reasks_until_valid_filepath() {
+  reset_env
+  write_skill "$CLAUDE" "valid-import" "description: Valid Import"
+  rm -rf "$ROOT_DIR/bad-relative-master"
+
+  printf 'bad-relative-master\n%s\n' "$MASTER" | "$ROOT_DIR/setup.sh" --claude "$CLAUDE" --codex "$CODEX" --no-service > "$TMP_DIR/reask-setup.out"
+
+  assert_contains "$SKILLMASTER_CONFIG" "MASTER_DIR=\"$MASTER\""
+  assert_file "$MASTER/valid-import/SKILL.md"
+  assert_file "$MASTER/index.html"
+  assert_contains "$TMP_DIR/reask-setup.out" "Invalid path"
+  assert_contains "$TMP_DIR/reask-setup.out" "Please enter an absolute path"
+  assert_not_exists "$ROOT_DIR/bad-relative-master"
 }
 
 main() {
@@ -173,6 +190,7 @@ main() {
   test_tool_delete_does_not_remove_master
   test_setup_and_uninstall_preserve_master
   test_interactive_default_uses_home_skills
+  test_interactive_reasks_until_valid_filepath
   echo "All tests passed"
 }
 

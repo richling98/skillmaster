@@ -110,6 +110,15 @@ Example custom location:
 ~/Documents/Vibing/skills
 ```
 
+At the prompt:
+
+- Press Enter if you want to use the default folder.
+- Paste the full absolute filepath if you want to use a different folder.
+- Do not type `default`.
+- Do not type a relative path such as `skills` or `default`.
+
+If the filepath is not valid, setup will explain the problem and ask again until you provide a valid writable folder.
+
 Choose a folder that is private, durable, and easy for you to find. Do not choose this tooling repo itself as your master skills folder.
 
 ### 3. What setup does

@@ -15,6 +15,89 @@ LOG_FILE="${SKILLMASTER_LOG:-$HOME/.skillmaster/sync.log}"
 EXCLUDED_SKILLS="${SKILLMASTER_EXCLUDES:-skill-creator,gstack}"
 DEBOUNCE_SECONDS="${SKILLMASTER_DEBOUNCE_SECONDS:-0.5}"
 
+trim_input() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+
+expand_user_path() {
+  local value="$1"
+  case "$value" in
+    "~")
+      printf '%s' "$HOME"
+      ;;
+    "~/"*)
+      printf '%s/%s' "$HOME" "${value#~/}"
+      ;;
+    *)
+      printf '%s' "$value"
+      ;;
+  esac
+}
+
+validate_master_dir() {
+  local candidate="$1"
+  local expanded
+  expanded="$(expand_user_path "$candidate")"
+
+  case "$expanded" in
+    /*)
+      ;;
+    *)
+      printf 'Invalid path: %s\n' "$candidate"
+      printf 'Please enter an absolute path, such as %s, or press Enter for the default.\n' "$HOME/skills"
+      return 1
+      ;;
+  esac
+
+  case "$expanded" in
+    "$ROOT_DIR"|"$ROOT_DIR"/*)
+      printf 'Invalid path: %s\n' "$expanded"
+      printf 'Please choose a master skills folder outside the SkillMaster tooling repo.\n'
+      return 1
+      ;;
+  esac
+
+  if ! mkdir -p "$expanded" 2>/dev/null; then
+    printf 'Invalid path: %s\n' "$expanded"
+    printf 'SkillMaster could not create that folder. Check the filepath and permissions, then try again.\n'
+    return 1
+  fi
+
+  if [[ ! -d "$expanded" || ! -w "$expanded" ]]; then
+    printf 'Invalid path: %s\n' "$expanded"
+    printf 'SkillMaster needs a writable folder. Choose a folder you can write to, then try again.\n'
+    return 1
+  fi
+
+  MASTER_DIR="$expanded"
+  return 0
+}
+
+prompt_for_master_dir() {
+  local default_dir="$MASTER_DIR"
+  local answer
+  while true; do
+    cat <<EOF
+Where should your master skills folder live?
+Default: $default_dir
+- Press Enter to use the default.
+- Or paste the full absolute filepath to the folder you want to use.
+EOF
+    printf '> '
+    if ! read -r answer; then
+      answer=""
+    fi
+    answer="$(trim_input "$answer")"
+    if [[ -z "$answer" ]]; then
+      answer="$default_dir"
+    fi
+    validate_master_dir "$answer" && break
+  done
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --non-interactive)
@@ -54,17 +137,9 @@ EOF
 done
 
 if [[ "$NON_INTERACTIVE" != "1" ]]; then
-  printf 'Where should your master skills folder live?\n(default: %s; press Enter or type "default" to use it) > ' "$MASTER_DIR"
-  read -r answer
-  answer="${answer#"${answer%%[![:space:]]*}"}"
-  answer="${answer%"${answer##*[![:space:]]}"}"
-  case "$answer" in
-    ""|default|DEFAULT|Default)
-      ;;
-    *)
-      MASTER_DIR="$answer"
-      ;;
-  esac
+  prompt_for_master_dir
+else
+  validate_master_dir "$MASTER_DIR"
 fi
 
 export MASTER_DIR CLAUDE_SKILLS_DIR CODEX_SKILLS_DIR LOG_FILE EXCLUDED_SKILLS DEBOUNCE_SECONDS

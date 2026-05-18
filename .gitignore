@@ -1,0 +1,8 @@
+.DS_Store
+.skillmaster/
+*.log
+tmp/
+dist/
+
+# User skill libraries should live outside this tooling repo.
+local-skills/

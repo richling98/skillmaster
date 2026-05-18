@@ -1,0 +1,11 @@
+[Unit]
+Description=SkillMaster watcher
+
+[Service]
+Type=simple
+ExecStart=__SKILLMASTER_ROOT__/scripts/watch.sh
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

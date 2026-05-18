@@ -1,0 +1,6 @@
+MASTER_DIR="$HOME/skills"
+CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
+CODEX_SKILLS_DIR="$HOME/.agents/skills"
+LOG_FILE="$HOME/.skillmaster/sync.log"
+EXCLUDED_SKILLS="skill-creator,gstack"
+DEBOUNCE_SECONDS="0.5"

@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SkillMaster — Project Plan</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      line-height: 1.7;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 60%);
+      border-bottom: 1px solid #2d3748;
+      padding: 64px 48px 48px;
+    }
+    .hero-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #76e3a0;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      color: #f7fafc;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: #76e3a0; }
+    .hero-sub {
+      font-size: 18px;
+      color: #94a3b8;
+      max-width: 640px;
+      margin-bottom: 32px;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .hero-meta span {
+      font-size: 13px;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hero-meta span strong { color: #94a3b8; }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 48px; }
+    section { padding: 56px 0; border-bottom: 1px solid #1e2535; }
+    section:last-child { border-bottom: none; }
+
+    h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    h2 .section-num {
+      background: #1e3a2f;
+      color: #76e3a0;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .section-desc {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 32px;
+      margin-top: 4px;
+    }
+
+    h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 8px;
+      margin-top: 24px;
+    }
+
+    p { color: #94a3b8; margin-bottom: 12px; }
+
+    /* ── Cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: #151b27;
+      border: 1px solid #1e2d3d;
+      border-radius: 12px;
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: #2d4a6b; }
+    .card-icon { font-size: 24px; margin-bottom: 12px; }
+    .card h3 { color: #e2e8f0; margin-top: 0; font-size: 15px; }
+    .card p { font-size: 14px; color: #64748b; margin: 0; }
+
+    /* ── Feature callout ── */
+    .feature-panel {
+      background: #0d1320;
+      border: 1px solid #1e2d3d;
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-top: 16px;
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .mini-spec {
+      background: #151b27;
+      border: 1px solid #1e2d3d;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .mini-spec strong {
+      display: block;
+      color: #e2e8f0;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .mini-spec span {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    /* ── Architecture diagram ── */
+    .arch {
+      background: #0d1320;
+      border: 1px solid #1e2d3d;
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 8px;
+    }
+    .arch-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+    .arch-node {
+      background: #151b27;
+      border: 1.5px solid #2d4a6b;
+      border-radius: 10px;
+      padding: 16px 24px;
+      text-align: center;
+      min-width: 140px;
+    }
+    .arch-node.master {
+      background: #0d2218;
+      border-color: #76e3a0;
+      border-width: 2px;
+    }
+    .arch-node .label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .arch-node.master .label { color: #76e3a0; }
+    .arch-node .name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+    .arch-node .path {
+      font-size: 11px;
+      color: #475569;
+      margin-top: 4px;
+      font-family: monospace;
+    }
+    .arch-arrow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 0 12px;
+      min-width: 80px;
+    }
+    .arch-arrow .line {
+      width: 56px;
+      height: 2px;
+      background: linear-gradient(90deg, #2d4a6b, #76e3a0, #2d4a6b);
+      position: relative;
+    }
+    .arch-arrow .line::before,
+    .arch-arrow .line::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      border: 5px solid transparent;
+    }
+    .arch-arrow .line::before {
+      left: -2px;
+      border-right-color: #76e3a0;
+    }
+    .arch-arrow .line::after {
+      right: -2px;
+      border-left-color: #76e3a0;
+    }
+    .arch-arrow .caption {
+      font-size: 10px;
+      color: #475569;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .arch-note {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 13px;
+      color: #475569;
+    }
+    .arch-note strong { color: #76e3a0; }
+
+    /* ── Repo tree ── */
+    .tree {
+      background: #0d1320;
+      border: 1px solid #1e2d3d;
+      border-radius: 12px;
+      padding: 28px 32px;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 13px;
+      line-height: 2;
+    }
+    .tree .dir { color: #76e3a0; font-weight: 700; }
+    .tree .file { color: #94a3b8; }
+    .tree .comment { color: #3d5166; }
+    .tree .indent1 { padding-left: 20px; }
+    .tree .indent2 { padding-left: 40px; }
+    .tree .indent3 { padding-left: 60px; }
+
+    /* ── Script cards ── */
+    .scripts { display: flex; flex-direction: column; gap: 16px; }
+    .script-card {
+      background: #151b27;
+      border: 1px solid #1e2d3d;
+      border-radius: 12px;
+      padding: 24px 28px;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .script-name {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: #76e3a0;
+      background: #0d2218;
+      border: 1px solid #1e3a2f;
+      border-radius: 6px;
+      padding: 6px 12px;
+      display: inline-block;
+    }
+    .script-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 8px;
+    }
+    .badge-new { background: #1a3a2f; color: #76e3a0; }
+    .badge-updated { background: #1a2a3f; color: #60a5fa; }
+    .badge-existing { background: #2a1f30; color: #c084fc; }
+    .script-desc { color: #64748b; font-size: 14px; }
+    .script-desc ul { padding-left: 18px; margin-top: 8px; }
+    .script-desc li { color: #64748b; font-size: 13px; margin-bottom: 4px; }
+
+    /* ── Steps / flow ── */
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 20px;
+      padding-bottom: 32px;
+      position: relative;
+    }
+    .step:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 22px;
+      top: 48px;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, #1e3a2f, #1e2535);
+    }
+    .step-num {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #0d2218;
+      border: 2px solid #76e3a0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #76e3a0;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .step-body h3 { color: #e2e8f0; margin-top: 10px; margin-bottom: 6px; }
+    .step-body p { font-size: 14px; }
+
+    /* ── Code blocks ── */
+    code {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 12px;
+      background: #0d1320;
+      color: #76e3a0;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    pre {
+      background: #0d1320;
+      border: 1px solid #1e2d3d;
+      border-radius: 10px;
+      padding: 20px 24px;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 13px;
+      color: #76e3a0;
+      overflow-x: auto;
+      margin-top: 12px;
+      line-height: 1.8;
+    }
+
+    /* ── Table ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+    thead tr { border-bottom: 2px solid #1e2d3d; }
+    tbody tr { border-bottom: 1px solid #1a2030; }
+    tbody tr:hover { background: #131925; }
+    th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #476580;
+    }
+    td { padding: 12px 16px; color: #94a3b8; }
+    td code { font-size: 11px; }
+    td:first-child { color: #e2e8f0; font-weight: 500; }
+
+    /* ── Tag pills ── */
+    .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    .tag {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #151b27;
+      border: 1px solid #1e2d3d;
+      color: #64748b;
+    }
+
+    /* ── Questions ── */
+    .resolved {
+      background: #0d2218;
+      border: 1px solid #1a3a2f;
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+    .resolved .q {
+      font-weight: 700;
+      color: #e2e8f0;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+    .resolved .a {
+      font-size: 14px;
+      color: #64748b;
+    }
+    .resolved .a strong { color: #76e3a0; }
+
+    /* ── Build progress ── */
+    .progress-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .progress-item {
+      background: #151b27;
+      border: 1px solid #1e2d3d;
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .progress-status {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      border-radius: 4px;
+      padding: 2px 7px;
+      margin-bottom: 8px;
+    }
+    .status-done { background: #0d2218; color: #76e3a0; border: 1px solid #1e3a2f; }
+    .status-active { background: #1a2a3f; color: #60a5fa; border: 1px solid #28466d; }
+    .status-pending { background: #202736; color: #64748b; border: 1px solid #2d3748; }
+    .progress-item strong {
+      display: block;
+      color: #e2e8f0;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+    .progress-item span {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      background: #0a0e18;
+      padding: 32px 48px;
+      text-align: center;
+      color: #2d3d52;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ HERO ══════════════════════════════════ -->
+<div class="hero">
+  <div class="container">
+    <div class="hero-label">Project Plan · v1.0</div>
+    <h1>Skill<span>Master</span></h1>
+    <p class="hero-sub">
+      A universal, private, local skills brain for AI agents — bidirectional sync
+      between Claude Code, Codex, and a master folder you control.
+    </p>
+    <div class="hero-meta">
+      <span>📅 <strong>Created:</strong> May 18, 2026</span>
+      <span>👤 <strong>Author:</strong> Richard Ling</span>
+      <span>🔒 <strong>Privacy:</strong> Local only, no cloud</span>
+      <span>🌐 <strong>Repo:</strong> Public tooling, private skills</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════════════ PROBLEM & SOLUTION ═══════════════════════════ -->
+<div class="container">
+
+<section>
+  <h2><span class="section-num">00</span> Build Progress</h2>
+  <p class="section-desc">Live implementation status for the SkillMaster build</p>
+
+  <div class="progress-list">
+    <div class="progress-item">
+      <div class="progress-status status-done">Done</div>
+      <strong>Scaffold and config</strong>
+      <span>Repo structure, config example, README, service templates, and meta-skill are in place.</span>
+    </div>
+    <div class="progress-item">
+      <div class="progress-status status-done">Done</div>
+      <strong>Core sync scripts</strong>
+      <span>Bootstrap, manual sync, watcher, setup, installer, and uninstall scripts are implemented.</span>
+    </div>
+    <div class="progress-item">
+      <div class="progress-status status-done">Done</div>
+      <strong>Sharing webpage</strong>
+      <span><code>generate-index.sh</code> builds a local <code>index.html</code> with search, preview, and copy controls.</span>
+    </div>
+    <div class="progress-item">
+      <div class="progress-status status-done">Verified</div>
+      <strong>Verification</strong>
+      <span><code>bash -n</code>, temp-directory integration tests, and HTML section-balance checks pass.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="section-num">01</span> Problem &amp; Solution</h2>
+  <p class="section-desc">Why this project exists</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🧩</div>
+      <h3>Fragmented skills libraries</h3>
+      <p>Claude Code stores skills in <code>~/.claude/skills/</code>. Codex stores them in <code>~/.agents/skills/</code>. There is no native way to share between them. Build a skill in one tool, manually duplicate it in the other — forever.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔄</div>
+      <h3>No single source of truth</h3>
+      <p>Skills drift apart over time. Update one in Claude Code and forget to update Codex. No history, no rollback, no backup. Your "brain" is scattered across directories you probably don't think about.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚙️</div>
+      <h3>Manual sync is error-prone</h3>
+      <p>Running copy commands after every skill change is friction that accumulates. It breaks the creative flow of building workflows and means sync often doesn't happen at all.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">✅</div>
+      <h3>SkillMaster solves all of this</h3>
+      <p>One master folder. Automatic bidirectional sync. Create a skill anywhere — it appears everywhere. Your skills stay private, local, git-tracked, and portable across machines.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════ ARCHITECTURE ════════════════════════════ -->
+<section>
+  <h2><span class="section-num">02</span> Architecture</h2>
+  <p class="section-desc">How the bidirectional sync works</p>
+
+  <div class="arch">
+    <div class="arch-row">
+      <div class="arch-node">
+        <div class="label">TOOL</div>
+        <div class="name">Claude Code</div>
+        <div class="path">~/.claude/skills/</div>
+      </div>
+
+      <div class="arch-arrow">
+        <div class="line"></div>
+        <div class="caption">auto-sync</div>
+      </div>
+
+      <div class="arch-node master">
+        <div class="label">MASTER BRAIN</div>
+        <div class="name">SkillMaster</div>
+        <div class="path">~/your/chosen/path/</div>
+      </div>
+
+      <div class="arch-arrow">
+        <div class="line"></div>
+        <div class="caption">auto-sync</div>
+      </div>
+
+      <div class="arch-node">
+        <div class="label">TOOL</div>
+        <div class="name">Codex</div>
+        <div class="path">~/.agents/skills/</div>
+      </div>
+    </div>
+
+    <div class="arch-note">
+      A file watcher monitors <strong>all three directories simultaneously</strong>.
+      Any new or updated skill in any location is automatically propagated to the other two.
+      <br/>The master folder is the canonical source — it also tracks history via git.
+    </div>
+  </div>
+
+  <h3>Watcher behavior</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Where it happens</th>
+        <th>What SkillMaster does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>New skill created</td>
+        <td>Master folder</td>
+        <td>Copy to <code>~/.claude/skills/</code> and <code>~/.agents/skills/</code></td>
+      </tr>
+      <tr>
+        <td>New skill created</td>
+        <td>Claude Code (<code>~/.claude/skills/</code>)</td>
+        <td>Copy to master folder and <code>~/.agents/skills/</code></td>
+      </tr>
+      <tr>
+        <td>New skill created</td>
+        <td>Codex (<code>~/.agents/skills/</code>)</td>
+        <td>Copy to master folder and <code>~/.claude/skills/</code></td>
+      </tr>
+      <tr>
+        <td>Skill updated (SKILL.md changed)</td>
+        <td>Any location</td>
+        <td>Overwrite in the other two locations</td>
+      </tr>
+      <tr>
+        <td>Skill deleted</td>
+        <td>Master folder</td>
+        <td>Remove from Claude Code and Codex (with confirmation prompt)</td>
+      </tr>
+      <tr>
+        <td>Skill deleted</td>
+        <td>Claude Code or Codex</td>
+        <td>Log the deletion; do <em>not</em> auto-delete from master (safety default)</td>
+      </tr>
+      <tr>
+        <td>Skill webpage needs refresh</td>
+        <td>Master folder after any add, update, rename, or delete</td>
+        <td>Regenerate <code>$MASTER_DIR/index.html</code> so the local sharing page reflects the current skill set</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ═════════════════════════ SKILL SHARING WEBPAGE ══════════════════════ -->
+<section>
+  <h2><span class="section-num">03</span> Skill Sharing Webpage</h2>
+  <p class="section-desc">A generated local catalog for viewing and copying skills</p>
+
+  <p>
+    SkillMaster should generate a static <code>index.html</code> inside the user's master skills folder.
+    Opening that file shows every local skill in one clean library view, without requiring a server,
+    cloud account, or packaged app.
+  </p>
+
+  <div class="feature-panel">
+    <h3 style="margin-top:0">Core behavior</h3>
+    <div class="feature-grid">
+      <div class="mini-spec">
+        <strong>List every skill</strong>
+        <span>Scan the master folder for each directory containing <code>SKILL.md</code>, then render name, description, path, and last updated time.</span>
+      </div>
+      <div class="mini-spec">
+        <strong>View skill content</strong>
+        <span>Each skill row expands into a readable <code>SKILL.md</code> preview so users can inspect the exact instructions before sharing.</span>
+      </div>
+      <div class="mini-spec">
+        <strong>Copy with one click</strong>
+        <span>A <code>Copy</code> button copies the full raw skill markdown to the clipboard for pasting into email, chat, docs, or any AI surface.</span>
+      </div>
+      <div class="mini-spec">
+        <strong>Auto-update on changes</strong>
+        <span>Whenever a skill is added, edited, renamed, or deleted, the watcher regenerates the HTML page from the current master folder state.</span>
+      </div>
+    </div>
+  </div>
+
+  <h3>Generated file</h3>
+  <pre>$MASTER_DIR/
+├── index.html              # Local skill sharing webpage
+├── email-digest/
+│   └── SKILL.md
+├── managing-calendar/
+│   └── SKILL.md
+└── ...</pre>
+
+  <h3>Implementation notes</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Concern</th>
+        <th>Decision</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Runtime model</td>
+        <td>Static HTML generated by <code>generate-index.sh</code></td>
+        <td>No web server, database, or background app needed. The browser opens the file directly.</td>
+      </tr>
+      <tr>
+        <td>Content source</td>
+        <td>Read only from the master folder</td>
+        <td>The master folder is canonical, so the page never has to reconcile Claude vs Codex copies.</td>
+      </tr>
+      <tr>
+        <td>Copy behavior</td>
+        <td>Use <code>navigator.clipboard.writeText()</code> with a textarea fallback</td>
+        <td>Works in modern browsers and still handles stricter local-file clipboard permissions gracefully.</td>
+      </tr>
+      <tr>
+        <td>Auto-update trigger</td>
+        <td>Run <code>generate-index.sh</code> after every successful master-folder sync event</td>
+        <td>The page is always rebuilt from disk, so additions, edits, and deletions are reflected immediately.</td>
+      </tr>
+      <tr>
+        <td>Share boundary</td>
+        <td>Copy the skill text, not upload it anywhere</td>
+        <td>Preserves the local-only privacy model while making skills easy to send manually.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══════════════════════════════ HOW THE WATCHER WORKS ══════════════════ -->
+<section>
+  <h2><span class="section-num">04</span> How the Watcher Works</h2>
+  <p class="section-desc">A technical deep-dive — and an honest assessment of whether it will actually hold up</p>
+
+  <!-- Layer 1: OS API -->
+  <h3>Layer 1 — The OS file system API</h3>
+  <p>
+    The watcher doesn't poll files on a timer (that would be slow and wasteful). Instead it hooks into the operating system's
+    own file event infrastructure, which emits notifications the instant a file is written to disk.
+  </p>
+  <div class="cards" style="margin-top:16px; margin-bottom:28px;">
+    <div class="card">
+      <div class="card-icon">🍎</div>
+      <h3>macOS — FSEvents API</h3>
+      <p>Apple's native kernel-level API. Used by Time Machine, Spotlight, Xcode, and most sync tools on the Mac.
+      When any file under a watched path changes, the kernel pushes an event immediately — no scanning, no delay.
+      <code>fswatch</code> wraps this API in a simple CLI.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🐧</div>
+      <h3>Linux — inotify API</h3>
+      <p>Linux's equivalent kernel subsystem. <code>inotifywait</code> (from the <code>inotify-tools</code> package) wraps it the same way.
+      Same behavior: events are pushed from the kernel the moment a write completes, with near-zero latency.</p>
+    </div>
+  </div>
+
+  <!-- Layer 2: fswatch -->
+  <h3>Layer 2 — fswatch sitting on top</h3>
+  <p>
+    <code>fswatch</code> is installed via <code>brew install fswatch</code> (macOS) or <code>apt install inotify-tools</code> (Linux).
+    It lets you watch <strong>multiple directories in a single command</strong> and pipes changed file paths to stdout, one per line.
+    The watcher script reads this stream in a loop and acts on each event.
+  </p>
+  <pre>
+# What the core watcher command looks like
+fswatch -r -L \
+    "$MASTER_DIR" \
+    "$HOME/.claude/skills" \
+    "$HOME/.agents/skills" | while IFS= read -r changed_path; do
+    handle_event "$changed_path"
+done</pre>
+  <p style="margin-top:12px">
+    The <code>-r</code> flag makes it recursive (watches subdirectories). The <code>-L</code> flag follows symlinks,
+    which matters because Claude Code's skills directory contains symlinks (e.g. <code>gstack/</code> variants).
+    The pipe feeds each changed path into a bash handler function.
+  </p>
+
+  <!-- Layer 3: Event handler -->
+  <h3>Layer 3 — The event handler logic</h3>
+  <p>When a path arrives from fswatch, the handler does five things in sequence:</p>
+
+  <div class="steps" style="margin-top:20px;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Identify which directory the change came from</h3>
+        <p>
+          Compare the changed path against the three watched directories to determine the source.
+          Then extract the <strong>skill name</strong> (the immediate subfolder under the skills directory)
+          and validate that the change is inside a <code>SKILL.md</code> file or a skill subfolder —
+          not a temp file, a lock file, or an editor swap file (e.g. <code>.swp</code>, <code>~</code>).
+        </p>
+        <pre>skill_name=$(echo "$changed_path" | sed "s|$source_dir/||" | cut -d'/' -f1)
+# Ignore non-skill paths (editor temp files, dot files, etc.)
+[[ "$skill_name" == .* ]] &amp;&amp; continue
+[[ ! -f "$source_dir/$skill_name/SKILL.md" ]] &amp;&amp; continue</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Check if this event was caused by us (loop prevention)</h3>
+        <p>
+          This is the hardest part. When the watcher copies a file to a destination, that copy itself
+          triggers a new fswatch event — which would trigger another copy — creating an infinite loop.
+          We prevent this using <strong>MD5 checksum comparison</strong>:
+        </p>
+        <pre>src_hash=$(md5sum "$source_dir/$skill_name/SKILL.md" | awk '{print $1}')
+dst_hash=$(md5sum "$dest_dir/$skill_name/SKILL.md" 2>/dev/null | awk '{print $1}')
+
+# If source and destination are already identical, do nothing.
+# This is what breaks the loop: after we copy, the next event
+# sees matching checksums and exits immediately.
+[ "$src_hash" = "$dst_hash" ] &amp;&amp; continue</pre>
+        <p>
+          This is more reliable than file-tagging approaches (like <code>xattr</code>) because many editors
+          and tools strip extended attributes when saving. Checksums are pure file content — nothing can strip them.
+        </p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Debounce — wait for the file to settle</h3>
+        <p>
+          Editors like VS Code often write a file in multiple rapid steps (write temp → rename → flush).
+          Without debouncing, the watcher would fire 3-4 times for a single save. We add a short settle wait:
+        </p>
+        <pre>sleep 0.5  # wait 500ms for the file to stop changing
+# Re-read the hash after settling — if it changed during the wait,
+# a new event will be coming anyway, so we can exit this one.
+new_hash=$(md5sum "$source_dir/$skill_name/SKILL.md" | awk '{print $1}')
+[ "$src_hash" != "$new_hash" ] &amp;&amp; continue</pre>
+        <p>500ms is imperceptible to a human but long enough to outlast virtually all editor save sequences.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>Copy to destinations</h3>
+        <p>
+          Copy the skill folder to each destination that isn't the source and doesn't already have an identical copy.
+          Log each operation to <code>~/.skillmaster/sync.log</code>.
+        </p>
+        <pre>for dest in "$MASTER_DIR" "$HOME/.claude/skills" "$HOME/.agents/skills"; do
+  [ "$dest" = "$source_dir" ] &amp;&amp; continue  # skip the source
+  dest_hash=$(md5sum "$dest/$skill_name/SKILL.md" 2>/dev/null | awk '{print $1}')
+  if [ "$src_hash" != "$dest_hash" ]; then
+    cp -r "$source_dir/$skill_name/" "$dest/$skill_name/"
+    echo "[$(date)] Synced $skill_name from $source_dir → $dest" >> ~/.skillmaster/sync.log
+  fi
+done</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h3>Regenerate the local sharing webpage</h3>
+        <p>
+          If the event changed the master folder, rebuild <code>$MASTER_DIR/index.html</code> from the current list
+          of skill directories. The generated page is ignored by sync detection so it does not create another sync loop.
+        </p>
+        <pre>if master_folder_changed "$changed_path"; then
+  scripts/generate-index.sh "$MASTER_DIR"
+  echo "[$(date)] Regenerated skill index page" >> ~/.skillmaster/sync.log
+fi</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layer 4: Persistence -->
+  <h3>Layer 4 — Persistence via launchd / systemd</h3>
+  <p>
+    The watcher is a long-running background process. Left to its own devices it would die when you close Terminal or restart your Mac.
+    <code>install-watcher.sh</code> solves this by registering it as a system service:
+  </p>
+  <div class="cards" style="margin-top:16px; margin-bottom:28px;">
+    <div class="card">
+      <div class="card-icon">🍎</div>
+      <h3>macOS — launchd</h3>
+      <p>A <code>.plist</code> file is written to <code>~/Library/LaunchAgents/</code> with <code>KeepAlive = true</code>.
+      macOS loads it on login and automatically restarts the watcher if it ever crashes.
+      This is exactly how tools like Dropbox and 1Password run in the background.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🐧</div>
+      <h3>Linux — systemd user service</h3>
+      <p>A <code>.service</code> file is installed to <code>~/.config/systemd/user/</code> with <code>Restart=always</code>.
+      Enabled with <code>systemctl --user enable skillmaster</code>. Survives reboots automatically.</p>
+    </div>
+  </div>
+
+  <!-- Edge cases -->
+  <h3>Edge cases and how they're handled</h3>
+  <table>
+    <thead>
+      <tr><th>Edge case</th><th>Risk</th><th>Mitigation</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Sync loop</td>
+        <td>Copy triggers event triggers copy → infinite loop</td>
+        <td>MD5 checksum comparison before every copy. After sync, source and dest are identical → next event exits immediately</td>
+      </tr>
+      <tr>
+        <td>Editor multi-step saves</td>
+        <td>3–4 events fire for one save operation</td>
+        <td>500ms debounce. Events within the settle window are absorbed; only the final state is synced</td>
+      </tr>
+      <tr>
+        <td>Symlinks in <code>~/.claude/skills/</code></td>
+        <td>Watcher follows symlink into <code>gstack/</code> and tries to sync those skills</td>
+        <td><code>-L</code> flag follows symlinks for watching, but skill detection validates that <code>SKILL.md</code> exists in the immediate subfolder. Symlinks pointing into nested structures won't match.</td>
+      </tr>
+      <tr>
+        <td>System/built-in skills</td>
+        <td>Bootstrap or watcher copies <code>skill-creator</code>, <code>docx</code>, etc. into master</td>
+        <td>Configurable exclusion list in <code>skillmaster.conf</code>. Listed skill names are never synced or bootstrapped.</td>
+      </tr>
+      <tr>
+        <td>Skill deleted from Claude or Codex</td>
+        <td>Auto-deletion propagates to master and causes data loss</td>
+        <td>Deletions from tool directories are <strong>never</strong> auto-propagated. Only logged. Deletion only flows outward from master (with confirmation prompt).</td>
+      </tr>
+      <tr>
+        <td>Two skills edited simultaneously</td>
+        <td>Race condition — two sync operations run at once</td>
+        <td>fswatch pipes events sequentially through a single <code>while read</code> loop. Events queue and are processed one at a time — no concurrency risk in shell.</td>
+      </tr>
+      <tr>
+        <td>Generated <code>index.html</code> changes</td>
+        <td>Regenerated sharing page triggers the watcher again</td>
+        <td>Explicitly ignore <code>$MASTER_DIR/index.html</code> in sync detection. It is a generated artifact, not a skill.</td>
+      </tr>
+      <tr>
+        <td>fswatch not installed</td>
+        <td>Watcher can't start</td>
+        <td><code>setup.sh</code> detects absence and installs via <code>brew install fswatch</code> (macOS) or <code>apt install inotify-tools</code> (Linux) before proceeding</td>
+      </tr>
+      <tr>
+        <td>Watcher crashes</td>
+        <td>Sync stops silently</td>
+        <td>launchd / systemd <code>KeepAlive / Restart=always</code> restarts the process automatically. Last restart time is visible in <code>sync.log</code>.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Honest verdict -->
+  <h3 style="margin-top:32px;">Honest verdict — will this actually work?</h3>
+  <div class="resolved">
+    <div class="q">✅ What will definitely work</div>
+    <div class="a">
+      The core sync mechanism is sound. fswatch + FSEvents is used by professional sync tools in production.
+      Checksum comparison is a well-established loop-prevention technique. The sequential event queue in bash
+      eliminates concurrency risk. launchd persistence is battle-tested on macOS.
+      For the primary use case — creating or editing a skill in one place and having it appear in the others —
+      <strong>this will work reliably</strong>.
+    </div>
+  </div>
+  <div class="resolved">
+    <div class="q">⚠️ What needs careful implementation</div>
+    <div class="a">
+      The sync loop prevention relies on the checksum check running <em>before</em> the copy.
+      If the script has a bug that skips this check, a loop will occur. This must be rigorously tested.
+      The debounce window (500ms) is a heuristic — very slow network drives or heavily loaded machines
+      might need a longer settle time. The exclusion list for system skills must be accurate and kept up to date
+      as Claude Code and Codex ship new built-in skills.
+    </div>
+  </div>
+  <div class="resolved">
+    <div class="q">❌ What won't be handled (out of scope)</div>
+    <div class="a">
+      Merging conflicting edits (e.g. you edit the same skill in Claude Code and Codex simultaneously before sync fires) —
+      the last-write wins. For skills files this is acceptable since they're small and rarely edited concurrently.
+      Multi-machine sync (two Macs sharing one skills brain) is not covered — that would require git pull/push or
+      a cloud folder, which is intentionally out of scope to keep skills private and local.
+    </div>
+  </div>
+
+</section>
+
+<!-- ══════════════════════════════ REPO STRUCTURE ═════════════════════════ -->
+<section>
+  <h2><span class="section-num">05</span> GitHub Repo Structure</h2>
+
+  <p class="section-desc">What gets published — tooling only, no personal skills</p>
+
+  <div class="tree">
+    <div><span class="dir">skillmaster/</span></div>
+    <div class="indent1"><span class="file">README.md</span> <span class="comment"># Setup guide + how it works</span></div>
+    <div class="indent1"><span class="file">setup.sh</span> <span class="comment"># One-command install: bootstrap + watcher</span></div>
+    <div class="indent1"><span class="dir">scripts/</span></div>
+    <div class="indent2"><span class="file">bootstrap.sh</span> <span class="comment"># Pull ALL existing skills from Claude + Codex into master</span></div>
+    <div class="indent2"><span class="file">sync.sh</span> <span class="comment"># Manual push: master → Claude Code + Codex</span></div>
+    <div class="indent2"><span class="file">watch.sh</span> <span class="comment"># The bidirectional file watcher (runs in background)</span></div>
+    <div class="indent2"><span class="file">generate-index.sh</span> <span class="comment"># Build master folder index.html for viewing + copying skills</span></div>
+    <div class="indent2"><span class="file">install-watcher.sh</span> <span class="comment"># Installs watcher as launchd service (macOS) / systemd (Linux)</span></div>
+    <div class="indent2"><span class="file">uninstall.sh</span> <span class="comment"># Clean removal of all SkillMaster components</span></div>
+    <div class="indent1"><span class="dir">skills/</span> <span class="comment"># Bundled meta-skills (shipped with repo)</span></div>
+    <div class="indent2"><span class="dir">add-new-skill/</span></div>
+    <div class="indent3"><span class="file">SKILL.md</span> <span class="comment"># Create + deploy a skill from any AI tool</span></div>
+    <div class="indent1"><span class="dir">config/</span></div>
+    <div class="indent2"><span class="file">skillmaster.conf.example</span> <span class="comment"># Template config (master path, excluded dirs, etc.)</span></div>
+    <div class="indent1"><span class="dir">launchd/</span></div>
+    <div class="indent2"><span class="file">com.skillmaster.watcher.plist</span> <span class="comment"># macOS launchd service template</span></div>
+    <div class="indent1"><span class="dir">systemd/</span></div>
+    <div class="indent2"><span class="file">skillmaster.service</span> <span class="comment"># Linux systemd service template</span></div>
+    <div class="indent1"><span class="dir">.github/</span></div>
+    <div class="indent2"><span class="dir">workflows/</span></div>
+    <div class="indent3"><span class="file">validate.yml</span> <span class="comment"># CI: checks SKILL.md files have valid name + description</span></div>
+  </div>
+
+  <div class="tags">
+    <div class="tag">🔒 No skills are committed to this repo</div>
+    <div class="tag">⚙️ Tooling only — works with any skill content</div>
+    <div class="tag">🌐 Local index.html generated inside the user's master folder</div>
+    <div class="tag">🍎 macOS + Linux support</div>
+    <div class="tag">📦 Zero dependencies (bash + fswatch/inotify)</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ SCRIPTS ════════════════════════════════ -->
+<section>
+  <h2><span class="section-num">06</span> Scripts</h2>
+  <p class="section-desc">What each component does</p>
+
+  <div class="scripts">
+
+    <div class="script-card">
+      <div>
+        <div class="script-name">bootstrap.sh</div>
+        <div class="script-badge badge-new">NEW</div>
+      </div>
+      <div class="script-desc">
+        <strong style="color:#e2e8f0">Imports all existing skills into the master folder.</strong> Run once during setup.
+        <ul>
+          <li>Scans <code>~/.claude/skills/</code> and <code>~/.agents/skills/</code> for every skill (any folder containing a <code>SKILL.md</code>)</li>
+          <li>Copies each one into the master folder</li>
+          <li>On conflict (same skill name, different content): shows a diff and prompts the user to choose which version to keep</li>
+          <li>Skips system-bundled skills that shouldn't be in the master repo (configurable exclusion list)</li>
+          <li>Produces a summary: how many skills imported, how many conflicts resolved</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="script-card">
+      <div>
+        <div class="script-name">watch.sh</div>
+        <div class="script-badge badge-new">NEW</div>
+      </div>
+      <div class="script-desc">
+        <strong style="color:#e2e8f0">The heart of SkillMaster — bidirectional auto-sync.</strong> Runs continuously in the background.
+        <ul>
+          <li>Watches all three directories simultaneously: master folder, <code>~/.claude/skills/</code>, and <code>~/.agents/skills/</code></li>
+          <li>Uses <code>fswatch</code> on macOS and <code>inotifywait</code> on Linux</li>
+          <li>On any file creation or modification, determines the source and propagates to the other two</li>
+          <li>Debounces rapid changes (e.g. editor saving multiple times) so it only syncs once per edit</li>
+          <li>Logs all sync events to <code>~/.skillmaster/sync.log</code> for debugging</li>
+          <li>Skips sync loops by comparing checksums before copying</li>
+          <li>Runs <code>generate-index.sh</code> after master-folder changes so the local skill sharing page stays current</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="script-card">
+      <div>
+        <div class="script-name">generate-index.sh</div>
+        <div class="script-badge badge-new">NEW</div>
+      </div>
+      <div class="script-desc">
+        <strong style="color:#e2e8f0">Builds the local skill sharing webpage.</strong>
+        <ul>
+          <li>Scans the master folder for every skill directory containing <code>SKILL.md</code></li>
+          <li>Extracts each skill's name, description, updated time, and raw markdown content</li>
+          <li>Writes <code>$MASTER_DIR/index.html</code> as a static page that opens directly in the browser</li>
+          <li>Provides a readable skill preview and a <code>Copy</code> button for each skill</li>
+          <li>Escapes skill content safely before embedding it in the generated HTML</li>
+          <li>Can be run manually, but is normally called by <code>watch.sh</code> after any master-folder change</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="script-card">
+      <div>
+        <div class="script-name">install-watcher.sh</div>
+        <div class="script-badge badge-new">NEW</div>
+      </div>
+      <div class="script-desc">
+        <strong style="color:#e2e8f0">Makes the watcher permanent — runs automatically on login.</strong>
+        <ul>
+          <li>On macOS: installs a <code>launchd</code> plist to <code>~/Library/LaunchAgents/</code>, starts it immediately</li>
+          <li>On Linux: installs a <code>systemd --user</code> service, enables and starts it</li>
+          <li>Checks that <code>fswatch</code> / <code>inotifywait</code> is installed; if not, offers to install via Homebrew / apt</li>
+          <li>After install, the watcher survives reboots with no manual intervention</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="script-card">
+      <div>
+        <div class="script-name">sync.sh</div>
+        <div class="script-badge badge-updated">UPDATED</div>
+      </div>
+      <div class="script-desc">
+        <strong style="color:#e2e8f0">Manual push from master → Claude Code + Codex.</strong> Useful when the watcher is off or for CI/scripting.
+        <ul>
+          <li><code>sync.sh</code> — sync all skills</li>
+          <li><code>sync.sh email-digest</code> — sync a single skill by name</li>
+          <li><code>sync.sh --dry-run</code> — preview what would be synced without making changes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="script-card">
+      <div>
+        <div class="script-name">setup.sh</div>
+        <div class="script-badge badge-new">NEW</div>
+      </div>
+      <div class="script-desc">
+        <strong style="color:#e2e8f0">One-command install for any new user.</strong>
+        <ul>
+          <li>Asks: where should the master skills folder live? (default: <code>~/skills</code>)</li>
+          <li>Writes a config file at <code>~/.skillmaster/config</code></li>
+          <li>Runs <code>bootstrap.sh</code> to import existing skills</li>
+          <li>Runs <code>generate-index.sh</code> so the master folder immediately contains a browsable <code>index.html</code></li>
+          <li>Copies the bundled <code>add-new-skill</code> meta-skill into Claude Code + Codex</li>
+          <li>Runs <code>install-watcher.sh</code> to start auto-sync</li>
+          <li>Prints a summary of what was set up</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="script-card">
+      <div>
+        <div class="script-name">add-new-skill</div>
+        <div class="script-badge badge-existing">SKILL</div>
+      </div>
+      <div class="script-desc">
+        <strong style="color:#e2e8f0">The meta-skill — creates and deploys a new skill from inside any AI tool.</strong>
+        <ul>
+          <li>Guides Claude/Codex through capturing the skill's name, description, and instructions</li>
+          <li>Writes the <code>SKILL.md</code> to the master folder</li>
+          <li>The watcher automatically picks it up and propagates to both tools</li>
+          <li>Falls back to running <code>sync.sh</code> manually if the watcher isn't running</li>
+          <li>Updates the master <code>README.md</code> skills index</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ SETUP FLOW ════════════════════════════ -->
+<section>
+  <h2><span class="section-num">07</span> Setup Flow</h2>
+  <p class="section-desc">What a new user does, start to finish</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Clone the repo</h3>
+        <p>One command in Terminal.</p>
+        <pre>git clone https://github.com/rling/skillmaster &amp;&amp; cd skillmaster</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Run setup</h3>
+        <p>Interactive setup asks where the master folder should live, then handles everything else automatically.</p>
+        <pre>./setup.sh
+
+# Example prompt:
+# Where should your master skills folder live?
+# (default: ~/skills) > ~/Documents/Vibing/skills</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Bootstrap imports all existing skills</h3>
+        <p>Every skill already in Claude Code and Codex is pulled into the master folder. Conflicts are shown with a diff and resolved interactively.</p>
+        <pre>✔ Imported 24 skills from ~/.claude/skills/
+✔ Imported 18 skills from ~/.agents/skills/
+⚠  3 conflicts found — resolving interactively...
+✔ Done. 42 skills now in your master folder.</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>Local skill library page is generated</h3>
+        <p>The setup script writes <code>index.html</code> into the master skills folder. The user can open it directly to browse, view, and copy any skill.</p>
+        <pre>✔ Generated ~/Documents/Vibing/skills/index.html
+✔ 42 skills available in the local sharing page
+✔ Copy buttons enabled for every SKILL.md</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h3>Watcher installed — auto-sync is live</h3>
+        <p>From this point on, any skill created in Claude Code, Codex, or the master folder is automatically propagated to the other two, and the local sharing page is regenerated whenever the master folder changes. No terminal commands needed.</p>
+        <pre>✔ Watcher installed as launchd service (macOS)
+✔ Auto-sync is running in the background
+✔ add-new-skill meta-skill deployed to Claude Code + Codex</pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <h3>Done — your skills brain is live</h3>
+        <p>Create skills anywhere. They show up everywhere. The master folder is your single source of truth, optionally backed up by git or a private GitHub repo, and <code>index.html</code> is the local copy-and-share surface.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════ DESIGN DECISIONS ══════════════════════════ -->
+<section>
+  <h2><span class="section-num">08</span> Design Decisions</h2>
+  <p class="section-desc">Key questions answered</p>
+
+  <div class="resolved">
+    <div class="q">Q: Where does the master folder live?</div>
+    <div class="a"><strong>User-configurable.</strong> During <code>setup.sh</code>, the user specifies any path they want. The choice is saved to <code>~/.skillmaster/config</code> and used by all scripts and the watcher automatically.</div>
+  </div>
+
+  <div class="resolved">
+    <div class="q">Q: Are personal skills committed to the GitHub repo?</div>
+    <div class="a"><strong>No.</strong> The GitHub repo contains only tooling (scripts, watcher, meta-skills). The user's master skills folder is entirely local and private. They can optionally push their skills to a <em>separate</em> private GitHub repo for backup and multi-machine sync — but this is never required.</div>
+  </div>
+
+  <div class="resolved">
+    <div class="q">Q: What happens when a skill is deleted from Claude Code or Codex?</div>
+    <div class="a"><strong>It is NOT auto-deleted from the master folder.</strong> Deletion is only propagated outward from master → tools (with a confirmation prompt), never inward. This prevents accidental data loss.</div>
+  </div>
+
+  <div class="resolved">
+    <div class="q">Q: What about system/built-in skills that ship with Claude Code or Codex?</div>
+    <div class="a"><strong>Excluded by default.</strong> A configurable list of skill names to skip during bootstrap and sync (e.g. <code>skill-creator</code>, <code>gstack</code> variants). Users can customize this list.</div>
+  </div>
+
+  <div class="resolved">
+    <div class="q">Q: How is the sync loop problem avoided?</div>
+    <div class="a"><strong>Checksum comparison + debouncing.</strong> Before copying, the watcher compares source and destination checksums. If they already match, the event is ignored. A 500ms debounce prevents multi-fire from editors saving incrementally.</div>
+  </div>
+
+  <div class="resolved">
+    <div class="q">Q: How does the local HTML sharing page stay up to date?</div>
+    <div class="a"><strong>Generated after master-folder changes.</strong> <code>generate-index.sh</code> rebuilds <code>$MASTER_DIR/index.html</code> during setup and after every successful sync into the master folder. The watcher ignores the generated HTML file itself so the rebuild does not trigger another sync cycle.</div>
+  </div>
+
+  <div class="resolved">
+    <div class="q">Q: Does copying a skill send it anywhere?</div>
+    <div class="a"><strong>No.</strong> The page uses the browser clipboard only. It copies raw <code>SKILL.md</code> text locally so the user can paste it into Teams, email, docs, another AI tool, or any other surface they choose.</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════ BUILD PLAN ════════════════════════════ -->
+<section>
+  <h2><span class="section-num">09</span> End-to-End Build Plan</h2>
+  <p class="section-desc">What I will implement, verify, and ship</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Scaffold the repo and config contract</h3>
+        <p>Create the public tooling repo structure: <code>scripts/</code>, <code>config/</code>, <code>launchd/</code>, <code>systemd/</code>, <code>skills/</code>, README, and <code>skillmaster.conf.example</code>. Define the config keys once: master folder path, Claude skills path, Codex skills path, excluded skill names, log path, debounce interval, and whether deletion propagation is enabled.</p>
+        <p><strong style="color:#e2e8f0">Verify:</strong> run shell syntax checks on every script and confirm setup can resolve all configured paths without creating files yet.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Build the bootstrap importer</h3>
+        <p>Implement <code>bootstrap.sh</code> to scan Claude Code and Codex skill folders, identify valid skills by the presence of <code>SKILL.md</code>, skip excluded system skills, and copy each user skill into the master folder. If the same skill exists with different content, show a diff and ask which version to keep.</p>
+        <p><strong style="color:#e2e8f0">Verify:</strong> test against temporary fake Claude/Codex directories with duplicate skills, excluded skills, missing <code>SKILL.md</code>, and conflict cases.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Build manual sync first</h3>
+        <p>Implement <code>sync.sh</code> before the watcher. It will push from master to Claude Code and Codex, support syncing all skills or one named skill, compare checksums before copying, provide <code>--dry-run</code>, and log what changed.</p>
+        <p><strong style="color:#e2e8f0">Verify:</strong> run dry-run and real sync tests in temp directories, then confirm unchanged skills are skipped and changed skills are copied exactly.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>Build the local skill sharing webpage generator</h3>
+        <p>Implement <code>generate-index.sh</code> to read the master folder and generate <code>$MASTER_DIR/index.html</code>. The page will list every skill, show metadata, expose a readable <code>SKILL.md</code> preview, and include a one-click <code>Copy</code> button for the raw markdown. The generator will escape embedded markdown safely and avoid external dependencies.</p>
+        <p><strong style="color:#e2e8f0">Verify:</strong> generate the page from sample skills containing markdown, code blocks, quotes, and special characters; open it in a browser and confirm preview and copy behavior work from a local file.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h3>Build the bidirectional watcher</h3>
+        <p>Implement <code>watch.sh</code> to monitor the master folder, Claude skills folder, and Codex skills folder. It will identify the source of a change, debounce editor save bursts, ignore generated artifacts like <code>index.html</code>, compare checksums to prevent sync loops, propagate updates to the other locations, and regenerate the local skill sharing page after master-folder changes.</p>
+        <p><strong style="color:#e2e8f0">Verify:</strong> run watcher tests in temp directories for create, edit, delete-from-master, delete-from-tool, rapid save, and generated-page refresh behavior.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <h3>Install the watcher as a background service</h3>
+        <p>Implement <code>install-watcher.sh</code> and service templates. On macOS, install a launchd plist in <code>~/Library/LaunchAgents/</code>. On Linux, install a systemd user service. The installer will detect <code>fswatch</code> or <code>inotifywait</code>, explain missing dependencies, start the service, and write logs to <code>~/.skillmaster/sync.log</code>.</p>
+        <p><strong style="color:#e2e8f0">Verify:</strong> install, start, stop, restart, and inspect service status. Confirm the watcher resumes after service restart and logs failures clearly.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <h3>Wire setup into one command</h3>
+        <p>Implement <code>setup.sh</code> as the guided install path. It will ask for the master folder location, write <code>~/.skillmaster/config</code>, run bootstrap, generate <code>index.html</code>, install the watcher, deploy the bundled <code>add-new-skill</code> meta-skill, and print the exact paths created.</p>
+        <p><strong style="color:#e2e8f0">Verify:</strong> run setup from a clean temp home directory and confirm the final folder layout, config file, imported skills, generated page, and running watcher all match the plan.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">8</div>
+      <div class="step-body">
+        <h3>Update the add-new-skill meta-skill</h3>
+        <p>Create the bundled <code>add-new-skill</code> skill so Claude Code or Codex can help a user write a new skill into the master folder. It will explain the expected folder shape, create <code>SKILL.md</code>, rely on the watcher for propagation, and fall back to <code>sync.sh</code> when the watcher is not running.</p>
+        <p><strong style="color:#e2e8f0">Verify:</strong> use the meta-skill instructions against a temp master folder and confirm the new skill appears in master, Claude, Codex, and the generated <code>index.html</code>.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">9</div>
+      <div class="step-body">
+        <h3>Add tests, validation, and cleanup tools</h3>
+        <p>Add a lightweight test harness that creates temporary skill folders and exercises the scripts without touching real user directories. Add CI validation for shell syntax and sample skill fixtures. Implement <code>uninstall.sh</code> to stop services and remove SkillMaster-managed files while leaving the user's master skills folder intact unless explicitly requested.</p>
+        <p><strong style="color:#e2e8f0">Verify:</strong> run the full test harness locally, run shellcheck where available, and confirm uninstall does not delete user skills by default.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">10</div>
+      <div class="step-body">
+        <h3>Do an end-to-end dogfood pass</h3>
+        <p>Run the whole product like a real user in a disposable local environment before calling it ready. This pass should prove setup, sync, generated HTML, background services, deletion safeguards, logging, and recovery all work together.</p>
+        <ul style="padding-left:18px; margin-top:8px; margin-bottom:12px;">
+          <li>Create isolated fake home directories for master skills, Claude skills, and Codex skills so no real user data is touched.</li>
+          <li>Run <code>setup.sh</code> from scratch and confirm it writes config, imports skills, generates <code>index.html</code>, installs the watcher, and prints useful next steps.</li>
+          <li>Seed realistic sample skills: simple markdown, long instructions, code blocks, nested asset files, special characters, and duplicate names with conflicting content.</li>
+          <li>Create a skill in the master folder and confirm it appears in Claude, Codex, and the generated sharing page.</li>
+          <li>Create a skill in Claude and another in Codex, then confirm both flow back into master, across to the other tool, and into <code>index.html</code>.</li>
+          <li>Edit the same skill from each location and confirm checksum logic avoids loops while the latest intended version propagates everywhere.</li>
+          <li>Delete a skill from master and verify the outward deletion path, confirmation behavior, logs, and generated page removal.</li>
+          <li>Delete a skill from Claude or Codex and verify the master copy is preserved, the deletion is logged, and the page still lists the master skill.</li>
+          <li>Open <code>$MASTER_DIR/index.html</code> directly from disk, expand several skills, use <code>Copy</code>, and paste into email/chat/docs/plain text to confirm the copied markdown is exact.</li>
+          <li>Restart the watcher service and reboot-simulate by stopping and starting launchd/systemd, then confirm syncing resumes without manual repair.</li>
+          <li>Force failure cases: missing <code>fswatch</code>, unreadable folder, malformed skill folder, generated <code>index.html</code> write failure, and interrupted copy. Confirm errors are understandable and no partial sync corrupts the master folder.</li>
+          <li>Run <code>uninstall.sh</code> and confirm services are removed, generated SkillMaster support files are cleaned up, and the user's master skills remain intact by default.</li>
+        </ul>
+        <p><strong style="color:#e2e8f0">Acceptance bar:</strong> a clean install can import existing skills, keep three folders in sync, auto-refresh the local sharing page after every meaningful change, survive watcher restarts, avoid data loss on tool-side deletes, and leave clear logs for every action.</p>
+        <p><strong style="color:#e2e8f0">Final deliverable:</strong> a public repo containing the SkillMaster tooling, a local private master skills folder created by setup, background sync across Claude Code and Codex, and an auto-updating local <code>index.html</code> page for viewing and copying every skill.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">11</div>
+      <div class="step-body">
+        <h3>Manual check</h3>
+        <p>After the automated dogfood pass is clean, run a short human acceptance test on your own machine. The goal is to confirm the product feels obvious, trustworthy, and useful outside the test harness.</p>
+        <ul style="padding-left:18px; margin-top:8px; margin-bottom:12px;">
+          <li>Run <code>./setup.sh</code> and choose the real master folder location you want to use.</li>
+          <li>Open the generated <code>index.html</code> in the master folder and confirm every expected skill appears with a readable name, description, and preview.</li>
+          <li>Click <code>Copy</code> on three different skills, then paste each into a plain text editor or chat draft and confirm the full <code>SKILL.md</code> content is copied exactly.</li>
+          <li>Create a small test skill directly inside the master folder, wait a moment, then confirm it appears in Claude Code skills, Codex skills, and the HTML page.</li>
+          <li>Create or edit a test skill from Claude Code, then confirm the change appears in the master folder, Codex, and the HTML page.</li>
+          <li>Create or edit a test skill from Codex, then confirm the change appears in the master folder, Claude Code, and the HTML page.</li>
+          <li>Rename or delete the test skill from the master folder and confirm the watcher handles it according to the documented deletion behavior.</li>
+          <li>Delete a test skill from only Claude Code or only Codex and confirm the master copy is not removed.</li>
+          <li>Restart your machine or restart the watcher service, then make one more skill edit and confirm sync still works.</li>
+          <li>Open <code>~/.skillmaster/sync.log</code> and confirm the actions you just took are visible and understandable.</li>
+          <li>Run <code>./sync.sh --dry-run</code> and confirm it explains what would change without touching files.</li>
+          <li>Run <code>./uninstall.sh</code> only when you are ready to test cleanup, and confirm it does not delete your master skills folder by default.</li>
+        </ul>
+        <p><strong style="color:#e2e8f0">Manual pass criteria:</strong> you can create, edit, view, copy, and share skills without thinking about which AI tool created them, and no test action causes unexpected data loss or confusing logs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /container -->
+
+<div class="footer">
+  SkillMaster · Plan v1.0 · Richard Ling · May 18, 2026
+</div>
+
+</body>
+</html>

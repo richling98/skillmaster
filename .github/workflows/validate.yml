@@ -1,0 +1,15 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Shell syntax
+        run: bash -n setup.sh scripts/*.sh tests/run.sh
+      - name: Integration tests
+        run: tests/run.sh

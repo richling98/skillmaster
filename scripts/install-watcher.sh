@@ -30,6 +30,13 @@ EOF
   esac
 done
 
+RUNTIME_DIR="$HOME/.skillmaster/runtime"
+RUNTIME_SCRIPTS_DIR="$RUNTIME_DIR/scripts"
+mkdir -p "$RUNTIME_SCRIPTS_DIR"
+cp "$ROOT_DIR/scripts/"*.sh "$RUNTIME_SCRIPTS_DIR/"
+chmod +x "$RUNTIME_SCRIPTS_DIR/"*.sh
+WATCH_PROGRAM="$RUNTIME_SCRIPTS_DIR/watch.sh"
+
 case "$(uname -s)" in
   Darwin)
     if ! command -v fswatch >/dev/null 2>&1; then
@@ -47,12 +54,14 @@ case "$(uname -s)" in
   <string>com.skillmaster.watcher</string>
   <key>ProgramArguments</key>
   <array>
-    <string>$ROOT_DIR/scripts/watch.sh</string>
+    <string>$WATCH_PROGRAM</string>
   </array>
   <key>EnvironmentVariables</key>
   <dict>
     <key>SKILLMASTER_CONFIG</key>
     <string>${SKILLMASTER_CONFIG:-$HOME/.skillmaster/config}</string>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
   </dict>
   <key>RunAtLoad</key>
   <true/>
@@ -70,6 +79,7 @@ EOF
       launchctl load "$plist"
     fi
     printf 'Installed launchd watcher at %s\n' "$plist"
+    printf 'Runtime scripts copied to %s\n' "$RUNTIME_SCRIPTS_DIR"
     ;;
   Linux)
     if ! command -v inotifywait >/dev/null 2>&1; then
@@ -86,7 +96,8 @@ Description=SkillMaster watcher
 [Service]
 Type=simple
 Environment=SKILLMASTER_CONFIG=${SKILLMASTER_CONFIG:-$HOME/.skillmaster/config}
-ExecStart=$ROOT_DIR/scripts/watch.sh
+Environment=PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+ExecStart=$WATCH_PROGRAM
 Restart=always
 RestartSec=2
 
@@ -98,6 +109,7 @@ EOF
       systemctl --user enable --now skillmaster.service
     fi
     printf 'Installed systemd watcher at %s\n' "$service"
+    printf 'Runtime scripts copied to %s\n' "$RUNTIME_SCRIPTS_DIR"
     ;;
   *)
     printf 'Unsupported OS: %s\n' "$(uname -s)" >&2

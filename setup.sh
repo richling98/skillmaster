@@ -54,9 +54,17 @@ EOF
 done
 
 if [[ "$NON_INTERACTIVE" != "1" ]]; then
-  printf 'Where should your master skills folder live?\n(default: %s) > ' "$MASTER_DIR"
+  printf 'Where should your master skills folder live?\n(default: %s; press Enter or type "default" to use it) > ' "$MASTER_DIR"
   read -r answer
-  [[ -n "$answer" ]] && MASTER_DIR="$answer"
+  answer="${answer#"${answer%%[![:space:]]*}"}"
+  answer="${answer%"${answer##*[![:space:]]}"}"
+  case "$answer" in
+    ""|default|DEFAULT|Default)
+      ;;
+    *)
+      MASTER_DIR="$answer"
+      ;;
+  esac
 fi
 
 export MASTER_DIR CLAUDE_SKILLS_DIR CODEX_SKILLS_DIR LOG_FILE EXCLUDED_SKILLS DEBOUNCE_SECONDS

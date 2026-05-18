@@ -153,6 +153,18 @@ test_setup_and_uninstall_preserve_master() {
   assert_not_exists "$HOME/.skillmaster/config"
 }
 
+test_interactive_default_uses_home_skills() {
+  reset_env
+  write_skill "$CLAUDE" "default-import" "description: Default Import"
+
+  printf ' Default \n' | "$ROOT_DIR/setup.sh" --claude "$CLAUDE" --codex "$CODEX" --no-service
+
+  assert_contains "$SKILLMASTER_CONFIG" "MASTER_DIR=\"$HOME/skills\""
+  assert_file "$HOME/skills/default-import/SKILL.md"
+  assert_file "$HOME/skills/index.html"
+  assert_not_exists "$ROOT_DIR/default"
+}
+
 main() {
   test_generate_index
   test_sync_pushes_master_to_tools
@@ -160,6 +172,7 @@ main() {
   test_watch_once_propagates_and_regenerates_index
   test_tool_delete_does_not_remove_master
   test_setup_and_uninstall_preserve_master
+  test_interactive_default_uses_home_skills
   echo "All tests passed"
 }
 

@@ -126,6 +126,14 @@ Choose a folder that is private, durable, and easy for you to find. Do not choos
 8. Installs the background watcher service unless you use `--no-service`.
 9. Prints the important paths it created.
 
+On macOS and Linux, the watcher service runs from a copied runtime under:
+
+```text
+~/.skillmaster/runtime/scripts/
+```
+
+This avoids macOS background-service privacy issues when the repo itself lives under folders like `~/Documents`.
+
 ### 4. Open the local skill library
 
 After setup, open:
@@ -278,6 +286,8 @@ Use this when debugging. Keep the terminal open.
 ```bash
 scripts/install-watcher.sh
 ```
+
+This copies runtime scripts to `~/.skillmaster/runtime/scripts/`, points launchd/systemd at that copy, and gives the service a PATH that includes common Homebrew locations such as `/opt/homebrew/bin`.
 
 Install but do not start:
 

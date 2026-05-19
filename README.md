@@ -1,49 +1,77 @@
 # SkillMaster
 
-SkillMaster is a local skills brain for AI agents.
+SkillMaster gives you one private, local home for reusable AI skills.
 
-It keeps one user-controlled master skills folder in sync with Claude Code and Codex skill folders, then generates a local `index.html` page where you can browse every skill, inspect the full `SKILL.md`, and copy a skill to paste anywhere.
+It keeps your chosen master skills folder in sync with Claude Code and Codex, and it generates a local `index.html` library where you can search, inspect, and copy any skill as raw markdown.
 
-The public repo contains tooling only. Your personal skills stay in your configured master folder.
+> Your skills stay on your computer. This repo is only the tooling.
+
+## At A Glance
+
+| Question | Answer |
+| --- | --- |
+| What is it? | A local skill manager for AI agent workflows. |
+| Who is it for? | People who use reusable `SKILL.md` instructions across Claude Code, Codex, and other surfaces. |
+| What does it sync? | Skill folders that contain a `SKILL.md` file. |
+| Where is the source of truth? | The master folder you choose during setup. |
+| Does it upload my skills? | No. Everything is local unless you separately put your master folder in a private repo or synced drive. |
+| Does it include a browser UI? | It generates a static local `index.html` file inside your master folder. |
+| Does it need a server? | No. Open the generated HTML file directly. |
 
 ## What You Get
 
-- One canonical master skills folder that you choose.
-- Import of existing Claude Code and Codex skills.
-- Manual sync from master to Claude Code and Codex.
-- Background bidirectional sync with deletion safeguards.
-- A generated local skill library page at `$MASTER_DIR/index.html`.
-- A `Copy` button for every skill so you can paste the full skill into email, chat, docs, or another AI surface.
-- A bundled `add-new-skill` meta-skill for creating new SkillMaster skills.
-- Tests that run against temporary fake skill folders without touching real user data.
+| Feature | What It Does |
+| --- | --- |
+| Master skills folder | One durable local folder where your skills live. |
+| Claude Code sync | Keeps `~/.claude/skills` current. |
+| Codex sync | Keeps `~/.agents/skills` current. |
+| Background watcher | Automatically notices skill changes and syncs them. |
+| Local skill library | Generates `$MASTER_DIR/index.html` with search, preview, and copy buttons. |
+| Copy-anywhere workflow | Copy the full `SKILL.md` and paste it into chat, email, docs, or another agent surface. |
+| Safety around deletes | Tool-side deletes do not delete the master copy. |
+| Setup script | Imports existing skills, writes config, generates the library, and installs the watcher. |
 
-## Supported Platforms
-
-SkillMaster is designed for:
-
-- macOS with `launchd`
-- Linux with `systemd --user`
-
-The scripts are written in Bash and use standard Unix tools.
-
-## Folder Model
+## How It Works
 
 SkillMaster coordinates three folders:
 
-```text
-Master folder          The private source of truth you choose during setup
-Claude Code skills     ~/.claude/skills
-Codex skills           ~/.agents/skills
+```mermaid
+flowchart LR
+  master["Master folder<br/>You choose this during setup"]
+  claude["Claude Code<br/>~/.claude/skills"]
+  codex["Codex<br/>~/.agents/skills"]
+  html["Local library<br/>$MASTER_DIR/index.html"]
+
+  master <--> claude
+  master <--> codex
+  master --> html
 ```
 
-Each skill is a directory containing a `SKILL.md` file:
+The folder you choose during setup is the private source of truth. SkillMaster imports existing Claude Code and Codex skills into it, then keeps all three locations aligned.
+
+## The Skill Shape
+
+Each skill is just a folder with a `SKILL.md` file:
 
 ```text
 my-skill/
 └── SKILL.md
 ```
 
-The generated sharing page lives beside your skills:
+A typical skill looks like this:
+
+```markdown
+---
+name: my-skill
+description: Use this when the user wants this reusable workflow.
+---
+
+# My Skill
+
+Instructions for the agent go here.
+```
+
+Your generated library lives next to your skills:
 
 ```text
 $MASTER_DIR/
@@ -54,87 +82,72 @@ $MASTER_DIR/
     └── SKILL.md
 ```
 
-## Prerequisites
+## Install
 
-### Required
+### Prerequisites
 
-- `bash`
-- `git`
-- `cp`, `find`, `awk`, `sed`, `cksum`, `stat`
+SkillMaster is intentionally small. On a normal macOS or Linux development machine, you should already have what you need.
 
-These are already available on a normal macOS or Linux development machine.
+| Requirement | Why It Is Needed |
+| --- | --- |
+| `bash` | Runs the setup and sync scripts. |
+| `git` | Clones this repo. |
+| Standard Unix tools | Uses `cp`, `find`, `awk`, `sed`, `cksum`, and `stat`. |
+| macOS `launchd` or Linux `systemd --user` | Runs the background watcher. |
 
-The installed background watcher uses polling mode by default, so there is no Homebrew or apt watcher dependency required for normal setup. If you run `scripts/watch.sh` manually in the foreground without polling mode, it can use `fswatch` on macOS or `inotifywait` on Linux when those tools are installed.
+The installed watcher uses polling mode by default, so normal setup does **not** require `fswatch`, Homebrew, `inotifywait`, or `apt`.
 
-## Install From GitHub
+### Step 1: Clone The Repo
 
-### 1. Clone the repo
+If you do not already have the repo:
 
 ```bash
 git clone https://github.com/richling98/skillmaster.git
 cd skillmaster
 ```
 
-### 2. Run setup
+If you already cloned it, go to that folder instead:
+
+```bash
+cd path/to/skillmaster
+```
+
+### Step 2: Run Setup
 
 ```bash
 ./setup.sh
 ```
 
-Setup asks where your master skills folder should live.
-
-Default:
+Setup asks:
 
 ```text
-~/skills
+Where should your master skills folder live?
+Default: /Users/you/skills
+- Press Enter to use the default.
+- Or paste the full absolute filepath to the folder you want to use.
+>
 ```
 
-Example custom location:
+Use one of these two answers:
+
+| What You Want | What To Type |
+| --- | --- |
+| Use the default folder | Press Enter. |
+| Use a custom folder | Paste the full absolute filepath, such as `/Users/you/Documents/skills`. |
+
+Do **not** type `default`. Do **not** type a relative path such as `skills`.
+
+If the path is invalid, setup explains the issue and asks again.
+
+### Step 3: Open The Library
+
+After setup finishes, it prints the path to your generated library:
 
 ```text
-~/Documents/Vibing/skills
+Skill library: /path/to/your/skills/index.html
 ```
 
-At the prompt:
-
-- Press Enter if you want to use the default folder.
-- Paste the full absolute filepath if you want to use a different folder.
-- Do not type `default`.
-- Do not type a relative path such as `skills` or `default`.
-
-If the filepath is not valid, setup will explain the problem and ask again until you provide a valid writable folder.
-
-Choose a folder that is private, durable, and easy for you to find. Do not choose this tooling repo itself as your master skills folder.
-
-### 3. What setup does
-
-`setup.sh` performs the full install:
-
-1. Creates your master skills folder if it does not exist.
-2. Creates Claude and Codex skills folders if needed.
-3. Writes config to `~/.skillmaster/config`.
-4. Imports existing skills from `~/.claude/skills` and `~/.agents/skills`.
-5. Skips configured system/built-in skills.
-6. Generates `$MASTER_DIR/index.html`.
-7. Copies the bundled `add-new-skill` meta-skill into master, Claude Code, and Codex.
-8. Installs the background watcher service unless you use `--no-service`.
-9. Prints the important paths it created.
-
-On macOS and Linux, the watcher service runs from a copied runtime under:
-
-```text
-~/.skillmaster/runtime/scripts/
-```
-
-This avoids macOS background-service privacy issues when the repo itself lives under folders like `~/Documents`.
-
-### 4. Open the local skill library
-
-After setup, open:
-
-```text
-$MASTER_DIR/index.html
-```
+Open that file in your browser.
 
 On macOS:
 
@@ -143,31 +156,91 @@ source ~/.skillmaster/config
 open "$MASTER_DIR/index.html"
 ```
 
-If your shell does not know `$MASTER_DIR`, read it from:
+## What Setup Does
 
-```bash
-cat ~/.skillmaster/config
+`setup.sh` performs the full install:
+
+| Step | Action |
+| --- | --- |
+| 1 | Creates your master folder if needed. |
+| 2 | Creates Claude Code and Codex skill folders if needed. |
+| 3 | Writes config to `~/.skillmaster/config`. |
+| 4 | Imports existing skills from Claude Code and Codex. |
+| 5 | Skips configured built-in/system skills. |
+| 6 | Generates `$MASTER_DIR/index.html`. |
+| 7 | Installs the bundled `add-new-skill` helper skill. |
+| 8 | Installs the background watcher unless `--no-service` is used. |
+| 9 | Prints the important paths. |
+
+The watcher runs from a copied runtime folder:
+
+```text
+~/.skillmaster/runtime/scripts/
 ```
 
-Then open the printed path manually in your browser.
+This avoids macOS background-service permission issues when the repo itself lives under protected locations such as `~/Documents`.
 
-## Non-Interactive Install
+## Daily Use
 
-Use this for testing, scripting, or repeatable setup:
+### Add A New Skill
 
-```bash
-./setup.sh \
-  --non-interactive \
-  --master "$HOME/skills" \
-  --claude "$HOME/.claude/skills" \
-  --codex "$HOME/.agents/skills"
-```
-
-Skip background service installation:
+Create a folder in your master directory:
 
 ```bash
-./setup.sh --non-interactive --master "$HOME/skills" --no-service
+source ~/.skillmaster/config
+mkdir -p "$MASTER_DIR/my-new-skill"
 ```
+
+Then add:
+
+```text
+$MASTER_DIR/my-new-skill/SKILL.md
+```
+
+The watcher syncs it to Claude Code and Codex automatically.
+
+### Edit A Skill
+
+Edit the master copy:
+
+```text
+$MASTER_DIR/<skill-name>/SKILL.md
+```
+
+Within a few seconds, SkillMaster updates:
+
+```text
+~/.claude/skills/<skill-name>/SKILL.md
+~/.agents/skills/<skill-name>/SKILL.md
+$MASTER_DIR/index.html
+```
+
+### Copy A Skill
+
+Open:
+
+```text
+$MASTER_DIR/index.html
+```
+
+Use search to find the skill, then click `Copy`.
+
+That copies the full raw `SKILL.md`, ready to paste anywhere.
+
+## Sync Rules
+
+| Change | Result |
+| --- | --- |
+| Add skill in master | Syncs to Claude Code and Codex. |
+| Edit skill in master | Syncs to Claude Code and Codex. |
+| Add/edit skill in Claude Code | Syncs to master and Codex. |
+| Add/edit skill in Codex | Syncs to master and Claude Code. |
+| Delete skill from master | Deletes the Claude Code and Codex copies. |
+| Delete skill from Claude Code | Logs the event; master is preserved. |
+| Delete skill from Codex | Logs the event; master is preserved. |
+| Regenerate `index.html` | Ignored by the watcher to avoid loops. |
+
+SkillMaster compares checksums before copying, so a sync it performs does not bounce forever between folders.
 
 ## Configuration
 
@@ -188,9 +261,16 @@ EXCLUDED_SKILLS="skill-creator,gstack"
 DEBOUNCE_SECONDS="0.5"
 ```
 
-You can edit this file if your folders move.
+| Setting | Meaning |
+| --- | --- |
+| `MASTER_DIR` | Your private source-of-truth skills folder. |
+| `CLAUDE_SKILLS_DIR` | Claude Code skills folder. |
+| `CODEX_SKILLS_DIR` | Codex skills folder. |
+| `LOG_FILE` | Sync and watcher activity log. |
+| `EXCLUDED_SKILLS` | Comma-separated skill names to skip. |
+| `DEBOUNCE_SECONDS` | Short wait before syncing after a file event. |
 
-After editing config, restart the watcher:
+If you edit config, restart the watcher.
 
 macOS:
 
@@ -207,198 +287,61 @@ systemctl --user restart skillmaster.service
 
 ## Commands
 
-### Import existing skills
-
-```bash
-scripts/bootstrap.sh
-```
-
-Imports skills from Claude Code and Codex into the master folder.
-
-Use non-interactive conflict handling:
-
-```bash
-scripts/bootstrap.sh --yes
-```
-
-When `--yes` sees a conflict, it keeps the existing master copy.
-
-### Sync master to tools
-
-```bash
-scripts/sync.sh
-```
-
-Pushes all master skills to Claude Code and Codex.
-
-Sync one skill:
-
-```bash
-scripts/sync.sh my-skill
-```
-
-Preview changes without writing files:
-
-```bash
-scripts/sync.sh --dry-run
-```
-
-Preview one skill:
-
-```bash
-scripts/sync.sh --dry-run my-skill
-```
-
-### Regenerate the local skill library page
-
-```bash
-scripts/generate-index.sh
-```
-
-Or explicitly pass the master folder:
-
-```bash
-scripts/generate-index.sh "$HOME/skills"
-```
-
-This rewrites:
-
-```text
-$MASTER_DIR/index.html
-```
-
-### Run the watcher in the foreground
-
-```bash
-scripts/watch.sh
-```
-
-Use this when debugging. Keep the terminal open.
-
-### Install the watcher service
-
-```bash
-scripts/install-watcher.sh
-```
-
-This copies runtime scripts to `~/.skillmaster/runtime/scripts/`, points launchd/systemd at that copy, gives the service a PATH that includes common Homebrew locations such as `/opt/homebrew/bin`, and runs the service in polling mode so it does not depend on macOS file-event permissions.
-
-Install but do not start:
-
-```bash
-scripts/install-watcher.sh --no-start
-```
-
-### Uninstall SkillMaster support files
-
-```bash
-scripts/uninstall.sh
-```
-
-Non-interactive:
-
-```bash
-scripts/uninstall.sh --yes
-```
-
-Uninstall removes SkillMaster services and support files, but preserves your master skills folder by default.
-
-## Background Watcher Behavior
-
-The watcher observes:
-
-- `$MASTER_DIR`
-- `~/.claude/skills`
-- `~/.agents/skills`
-
-When a skill is created or edited in any watched folder, SkillMaster syncs it to the other locations. Installed services use polling mode for reliability; foreground `scripts/watch.sh` still uses native file events when available.
-
-Loop prevention uses checksums. If source and destination content already match, no copy happens.
-
-The watcher ignores generated artifacts such as:
-
-```text
-$MASTER_DIR/index.html
-```
-
-After the master folder changes, SkillMaster regenerates the local skill library page.
-
-## Deletion Behavior
-
-SkillMaster is intentionally conservative with deletes.
-
-| Delete location | Behavior |
+| Command | Purpose |
 | --- | --- |
-| Master folder | Can propagate outward to Claude Code and Codex after confirmation |
-| Claude Code | Logged, but master is preserved |
-| Codex | Logged, but master is preserved |
+| `./setup.sh` | Guided install. |
+| `scripts/bootstrap.sh` | Import existing Claude/Codex skills into master. |
+| `scripts/sync.sh` | Push master skills to Claude Code and Codex. |
+| `scripts/sync.sh my-skill` | Sync one skill from master. |
+| `scripts/sync.sh --dry-run` | Preview sync actions without writing files. |
+| `scripts/generate-index.sh` | Regenerate `$MASTER_DIR/index.html`. |
+| `scripts/watch.sh` | Run watcher in the foreground for debugging. |
+| `scripts/install-watcher.sh` | Install/reinstall the background watcher. |
+| `scripts/uninstall.sh` | Remove SkillMaster support files and services. |
 
-This prevents accidental data loss if a tool-side skill folder is deleted.
+## Non-Interactive Install
 
-## Generated `index.html`
-
-The generated local page includes:
-
-- Search box
-- One entry per skill
-- Skill name
-- Description from frontmatter when present
-- Last updated time
-- Expandable full `SKILL.md` preview
-- `Copy` button for the raw markdown
-
-The page is a static file. It does not require a local web server.
-
-Copy behavior uses `navigator.clipboard.writeText()` with a fallback for stricter local-file browser permissions.
-
-## Manual Acceptance Check
-
-Run this after installation to confirm everything works on your machine.
-
-### 1. Confirm setup paths
+Use this for scripting or repeatable tests:
 
 ```bash
-cat ~/.skillmaster/config
+./setup.sh \
+  --non-interactive \
+  --master "$HOME/skills" \
+  --claude "$HOME/.claude/skills" \
+  --codex "$HOME/.agents/skills"
+```
+
+Skip the background watcher:
+
+```bash
+./setup.sh --non-interactive --master "$HOME/skills" --no-service
+```
+
+## Verify It Works
+
+### Quick Health Check
+
+macOS:
+
+```bash
+launchctl print gui/$(id -u)/com.skillmaster.watcher | grep -E "state =|last exit code|pid ="
+wc -l ~/.skillmaster/state/watch-state.previous
+tail -n 20 ~/.skillmaster/sync.log
+```
+
+Expected:
+
+| Check | Good Output |
+| --- | --- |
+| Watcher state | `state = running` |
+| Last exit code | `(never exited)` |
+| State file count | A nonzero number |
+| Log | Recent sync or watcher startup messages |
+
+### Manual End-To-End Test
+
+```bash
 source ~/.skillmaster/config
-```
-
-Check that:
-
-- `MASTER_DIR` is the folder you intended.
-- `CLAUDE_SKILLS_DIR` points to your Claude Code skills folder.
-- `CODEX_SKILLS_DIR` points to your Codex skills folder.
-- `LOG_FILE` points somewhere under `~/.skillmaster`.
-
-### 2. Confirm the generated page opens
-
-Open:
-
-```text
-$MASTER_DIR/index.html
-```
-
-Check that:
-
-- Expected skills are listed.
-- Skill descriptions look reasonable.
-- Expanding a skill shows the full `SKILL.md`.
-- Search filters the list.
-
-### 3. Confirm copy works
-
-Click `Copy` on three skills.
-
-Paste each into:
-
-- a plain text editor
-- a chat draft
-- an email draft
-
-Check that the pasted content is the full raw `SKILL.md`.
-
-### 4. Create a skill in the master folder
-
-```bash
 mkdir -p "$MASTER_DIR/manual-master-test"
 cat > "$MASTER_DIR/manual-master-test/SKILL.md" <<'EOF'
 ---
@@ -412,7 +355,7 @@ This skill verifies master-to-tool sync.
 EOF
 ```
 
-Wait a moment, then check:
+Wait 5-10 seconds, then check:
 
 ```bash
 test -f "$HOME/.claude/skills/manual-master-test/SKILL.md" && echo "Claude copy exists"
@@ -421,121 +364,26 @@ test -f "$HOME/.agents/skills/manual-master-test/SKILL.md" && echo "Codex copy e
 
 Open `$MASTER_DIR/index.html` and confirm `manual-master-test` appears.
 
-### 5. Create or edit a skill in Claude Code
+## Generated Library Page
 
-```bash
-mkdir -p "$HOME/.claude/skills/manual-claude-test"
-cat > "$HOME/.claude/skills/manual-claude-test/SKILL.md" <<'EOF'
----
-name: manual-claude-test
-description: Manual test skill created in Claude Code.
----
+The generated `index.html` is a static local file.
 
-# Manual Claude Test
+It includes:
 
-This skill verifies Claude-to-master-to-Codex sync.
-EOF
-```
+| UI Element | Purpose |
+| --- | --- |
+| Search | Filters skills by name and description. |
+| Skill cards | One row per skill. |
+| Description | Reads from YAML frontmatter when present. |
+| Updated timestamp | Shows the `SKILL.md` modified time. |
+| View skill | Expands the full markdown. |
+| Copy | Copies the full raw `SKILL.md`. |
 
-Wait a moment, then check:
-
-```bash
-test -f "$MASTER_DIR/manual-claude-test/SKILL.md" && echo "Master copy exists"
-test -f "$HOME/.agents/skills/manual-claude-test/SKILL.md" && echo "Codex copy exists"
-```
-
-### 6. Create or edit a skill in Codex
-
-```bash
-mkdir -p "$HOME/.agents/skills/manual-codex-test"
-cat > "$HOME/.agents/skills/manual-codex-test/SKILL.md" <<'EOF'
----
-name: manual-codex-test
-description: Manual test skill created in Codex.
----
-
-# Manual Codex Test
-
-This skill verifies Codex-to-master-to-Claude sync.
-EOF
-```
-
-Wait a moment, then check:
-
-```bash
-test -f "$MASTER_DIR/manual-codex-test/SKILL.md" && echo "Master copy exists"
-test -f "$HOME/.claude/skills/manual-codex-test/SKILL.md" && echo "Claude copy exists"
-```
-
-### 7. Confirm tool-side delete safety
-
-Delete only the Claude copy:
-
-```bash
-rm -rf "$HOME/.claude/skills/manual-claude-test"
-```
-
-Wait a moment, then check:
-
-```bash
-test -f "$MASTER_DIR/manual-claude-test/SKILL.md" && echo "Master preserved"
-```
-
-The master copy should still exist.
-
-### 8. Confirm dry-run sync
-
-```bash
-scripts/sync.sh --dry-run
-```
-
-The command should print what it would sync without changing files.
-
-### 9. Inspect logs
-
-```bash
-tail -n 50 ~/.skillmaster/sync.log
-```
-
-Check that recent sync, index regeneration, and delete-safety events are understandable.
-
-### 10. Restart the watcher
-
-macOS:
-
-```bash
-launchctl unload "$HOME/Library/LaunchAgents/com.skillmaster.watcher.plist"
-launchctl load "$HOME/Library/LaunchAgents/com.skillmaster.watcher.plist"
-```
-
-Linux:
-
-```bash
-systemctl --user restart skillmaster.service
-systemctl --user status skillmaster.service
-```
-
-Make one more small edit to a test skill and confirm sync still works.
-
-## Automated Verification
-
-Run syntax checks:
-
-```bash
-bash -n setup.sh scripts/*.sh tests/run.sh
-```
-
-Run the integration tests:
-
-```bash
-tests/run.sh
-```
-
-The integration tests create temporary fake master, Claude, and Codex skill folders. They do not touch real user skill directories.
+Clipboard behavior uses `navigator.clipboard.writeText()` with a fallback for stricter local-file browser permissions.
 
 ## Troubleshooting
 
-### The watcher is not syncing
+### The Watcher Is Not Syncing
 
 Check config:
 
@@ -558,53 +406,46 @@ wc -l /tmp/skillmaster-state.txt
 head /tmp/skillmaster-state.txt
 ```
 
-Run the watcher in the foreground:
+If the count is `0`, check whether the paths in `~/.skillmaster/config` are correct and readable.
+
+### The Generated Page Is Stale
+
+Regenerate it:
 
 ```bash
-scripts/watch.sh
+source ~/.skillmaster/config
+scripts/generate-index.sh "$MASTER_DIR"
 ```
 
-Make a small skill edit and watch for errors.
+Refresh the browser tab.
 
-### The generated page is stale
-
-Regenerate it manually:
-
-```bash
-scripts/generate-index.sh
-```
-
-Then refresh the browser tab.
-
-### Clipboard copy does not work
+### Copy Does Not Work In The Browser
 
 Some browsers restrict clipboard access for local files.
 
-Try:
+Fallback:
 
 1. Click `View skill`.
-2. Select the visible `SKILL.md` text manually.
-3. Copy with the browser or operating system shortcut.
+2. Select the visible markdown.
+3. Copy with your operating system shortcut.
 
-The page also includes a fallback copy path, but browser policies differ.
+### A Skill Did Not Import
 
-### A skill did not import
-
-Check that the skill folder contains:
+Confirm the folder contains:
 
 ```text
 SKILL.md
 ```
 
-Check whether its folder name appears in:
+Then check exclusions:
 
 ```bash
 grep EXCLUDED_SKILLS ~/.skillmaster/config
 ```
 
-Excluded skills are skipped by bootstrap and sync.
+Excluded skill names are skipped by bootstrap and sync.
 
-### I chose the wrong master folder
+### You Chose The Wrong Master Folder
 
 Edit:
 
@@ -612,41 +453,44 @@ Edit:
 ~/.skillmaster/config
 ```
 
-Change `MASTER_DIR`, then create the folder if needed:
+Change `MASTER_DIR`, then run:
 
 ```bash
 source ~/.skillmaster/config
 mkdir -p "$MASTER_DIR"
-```
-
-Run bootstrap and regenerate the page:
-
-```bash
 scripts/bootstrap.sh
 scripts/generate-index.sh "$MASTER_DIR"
 ```
 
-Restart the watcher service.
+Restart the watcher afterward.
 
 ## Uninstall
-
-Run:
 
 ```bash
 scripts/uninstall.sh
 ```
 
-Or:
+Non-interactive:
 
 ```bash
 scripts/uninstall.sh --yes
 ```
 
-By default, uninstall removes SkillMaster support files and services but preserves your master skills folder.
+Uninstall removes SkillMaster support files and services. It preserves your master skills folder by default.
 
-If you want to remove your master skills folder too, delete it manually after confirming you have a backup.
+If you want to remove your master skills folder too, delete it manually only after confirming you have a backup.
 
-## Repository Contents
+## Privacy And Safety
+
+| Topic | Behavior |
+| --- | --- |
+| Uploads | SkillMaster does not upload skills anywhere. |
+| Generated page | `index.html` is local. |
+| Clipboard | Copy button writes only to your clipboard. |
+| Public repo | This repo should contain tooling, not your private skills. |
+| Backups | Use a separate private repo or private synced folder if you want backup/multi-machine sync. |
+
+## Repository Map
 
 ```text
 README.md
@@ -674,10 +518,18 @@ plans/
   skillmaster-plan.html
 ```
 
-## Privacy Model
+## Developer Checks
 
-SkillMaster does not upload skills anywhere.
+Run syntax checks:
 
-The generated `index.html` is local. The copy button puts text on your clipboard only. You decide where to paste it.
+```bash
+bash -n setup.sh scripts/*.sh tests/run.sh
+```
 
-If you want backup or multi-machine sync, put your master skills folder in a separate private repo or private synced folder. Do not commit private skills into this public tooling repo unless you intentionally want them public.
+Run integration tests:
+
+```bash
+tests/run.sh
+```
+
+The tests create temporary fake master, Claude, and Codex folders. They do not touch your real skills.

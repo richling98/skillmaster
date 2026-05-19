@@ -1,8 +1,6 @@
 # SkillMaster
 
-Create a skill once in **Claude Code** or **Codex**. SkillMaster automatically syncs it to the other tool and saves it in one local folder that becomes your personal, reusable AI skills brain.
-
-SkillMaster also creates a local `index.html` library so you can browse, copy, and share your skills anywhere.
+Say goodbye to copying .md skill files from Codex to Claude or vice versa. With SkillMaster, you can create a skill once, and it will sync to Claude and Codex. SkillMaster also creates a local folder that stores all of your skills — complete with your own website for all of your skills (as an .html file), so that you can easily browse, copy, and share your skills anywhere. 
 
 ## The Value
 

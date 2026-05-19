@@ -60,9 +60,6 @@ import_skill() {
 
   conflicts=$((conflicts + 1))
   printf 'Conflict for skill "%s"\n' "$skill_name" >&2
-  if command -v diff >/dev/null 2>&1; then
-    diff -u "$master_skill/SKILL.md" "$source_skill/SKILL.md" >&2 || true
-  fi
 
   if [[ "$YES" == "1" || -n "${SKILLMASTER_ASSUME_YES:-}" ]]; then
     printf 'Keeping existing master copy for %s\n' "$skill_name" >&2

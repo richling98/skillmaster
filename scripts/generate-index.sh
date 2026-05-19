@@ -68,20 +68,20 @@ cat > "$OUT" <<'HTML'
   <title>SkillMaster Library</title>
   <style>
     :root {
-      color-scheme: light;
-      --bg: #f5f5f7;
-      --surface: rgba(255, 255, 255, 0.82);
-      --surface-strong: #ffffff;
-      --text: #1d1d1f;
-      --muted: #6e6e73;
-      --quiet: #86868b;
-      --line: rgba(0, 0, 0, 0.11);
-      --line-soft: rgba(0, 0, 0, 0.07);
-      --blue: #0066cc;
-      --blue-hover: #004f9f;
-      --green: #188038;
-      --code-bg: #fbfbfd;
-      --shadow: 0 18px 45px rgba(0, 0, 0, 0.08);
+      color-scheme: dark;
+      --bg: #050507;
+      --surface: rgba(28, 28, 30, 0.78);
+      --surface-strong: rgba(22, 22, 24, 0.96);
+      --text: #f5f5f7;
+      --muted: #a1a1a6;
+      --quiet: #73737a;
+      --line: rgba(255, 255, 255, 0.14);
+      --line-soft: rgba(255, 255, 255, 0.08);
+      --blue: #0a84ff;
+      --blue-hover: #409cff;
+      --green: #30d158;
+      --code-bg: #101013;
+      --shadow: 0 22px 55px rgba(0, 0, 0, 0.42);
     }
     * { box-sizing: border-box; }
     html { background: var(--bg); }
@@ -89,8 +89,9 @@ cat > "$OUT" <<'HTML'
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
       background:
-        radial-gradient(circle at 20% -10%, rgba(0, 102, 204, 0.10), transparent 34%),
-        radial-gradient(circle at 90% 0%, rgba(52, 199, 89, 0.08), transparent 28%),
+        radial-gradient(circle at 18% -12%, rgba(10, 132, 255, 0.28), transparent 32%),
+        radial-gradient(circle at 92% 0%, rgba(48, 209, 88, 0.13), transparent 28%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 34%),
         var(--bg);
       color: var(--text);
       line-height: 1.45;
@@ -104,10 +105,6 @@ cat > "$OUT" <<'HTML'
       padding: 42px 0 24px;
     }
     .masthead {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: end;
-      gap: 24px;
       padding: 26px 0 12px;
     }
     .eyebrow {
@@ -131,39 +128,16 @@ cat > "$OUT" <<'HTML'
       color: var(--muted);
       font-size: 18px;
     }
-    .metric {
-      min-width: 154px;
-      padding: 18px;
-      border: 1px solid var(--line-soft);
-      border-radius: 8px;
-      background: var(--surface);
-      box-shadow: var(--shadow);
-      text-align: right;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-    .metric strong {
-      display: block;
-      font-size: 34px;
-      line-height: 1;
-    }
-    .metric span {
-      display: block;
-      margin-top: 6px;
-      color: var(--quiet);
-      font-size: 13px;
-      font-weight: 600;
-    }
     .toolbar-wrap {
       position: sticky;
       top: 0;
       z-index: 10;
       margin: 4px 0 22px;
       padding: 12px 0;
-      background: rgba(245, 245, 247, 0.78);
+      background: rgba(5, 5, 7, 0.78);
       backdrop-filter: blur(22px);
       -webkit-backdrop-filter: blur(22px);
-      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
     .toolbar {
       display: grid;
@@ -204,16 +178,16 @@ cat > "$OUT" <<'HTML'
       padding: 0 14px 0 43px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.86);
+      background: rgba(28, 28, 30, 0.86);
       color: var(--text);
       font-size: 14px;
       outline: none;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
       appearance: none;
     }
     input[type="search"]:focus {
-      border-color: rgba(0, 102, 204, 0.55);
-      box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.12);
+      border-color: rgba(10, 132, 255, 0.62);
+      box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.18);
     }
     .result-count {
       color: var(--muted);
@@ -230,12 +204,12 @@ cat > "$OUT" <<'HTML'
       background: var(--surface-strong);
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
       transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
     }
     .skill:hover {
-      border-color: rgba(0, 102, 204, 0.24);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+      border-color: rgba(10, 132, 255, 0.34);
+      box-shadow: var(--shadow);
       transform: translateY(-1px);
     }
     .skill-header {
@@ -272,7 +246,7 @@ cat > "$OUT" <<'HTML'
       padding: 4px 7px;
       border: 1px solid var(--line-soft);
       border-radius: 7px;
-      background: var(--bg);
+      background: rgba(255, 255, 255, 0.045);
       overflow-wrap: anywhere;
     }
     .updated {
@@ -324,8 +298,8 @@ cat > "$OUT" <<'HTML'
       padding: 18px 22px 24px;
       overflow-x: auto;
       border-top: 1px solid var(--line-soft);
-      background: #ffffff;
-      color: #242426;
+      background: #0b0b0d;
+      color: #e8e8ed;
       font-size: 13px;
       line-height: 1.58;
       font-family: "SF Mono", ui-monospace, Menlo, monospace;
@@ -342,14 +316,6 @@ cat > "$OUT" <<'HTML'
     @media (max-width: 780px) {
       .shell { width: min(100% - 28px, 1180px); }
       header { padding-top: 22px; }
-      .masthead {
-        grid-template-columns: 1fr;
-        align-items: start;
-      }
-      .metric {
-        width: 100%;
-        text-align: left;
-      }
       .toolbar {
         grid-template-columns: 1fr;
       }
@@ -366,15 +332,9 @@ cat > "$OUT" <<'HTML'
 <body>
 <header>
   <div class="shell masthead">
-    <div>
-      <p class="eyebrow">SkillMaster</p>
-      <h1>Skills Library</h1>
-      <p>Browse, inspect, and copy your local AI skills from one clean surface.</p>
-    </div>
-    <div class="metric">
-      <strong id="total-count">0</strong>
-      <span>skills</span>
-    </div>
+    <p class="eyebrow">SkillMaster</p>
+    <h1>Skills Library</h1>
+    <p>Browse, inspect, and copy your local AI skills from one clean surface.</p>
   </div>
 </header>
 <div class="toolbar-wrap">
@@ -441,7 +401,6 @@ cat >> "$OUT" <<'HTML'
 </main>
 <script>
 const totalCount = document.querySelectorAll(".skill").length;
-document.getElementById("total-count").textContent = totalCount;
 document.getElementById("result-count").textContent = `Showing ${totalCount} ${totalCount === 1 ? "skill" : "skills"}`;
 
 function copySkill(id, button) {

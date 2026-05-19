@@ -33,7 +33,7 @@ SkillMaster watches three places:
 | Codex skills | Where Codex reads skills. |
 | Your master folder | Your private source of truth for all skills. |
 
-When you add or edit a skill in any of those places, SkillMaster syncs the change everywhere else.
+When you add or edit a skill in any of those places, SkillMaster syncs the change everywhere else. Create a skill anywhere, sync it everywhere. 
 
 ## Why This Matters
 

@@ -10,9 +10,11 @@ load_config() {
   MASTER_DIR="${MASTER_DIR:-$HOME/skills}"
   CLAUDE_SKILLS_DIR="${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
   CODEX_SKILLS_DIR="${CODEX_SKILLS_DIR:-$HOME/.agents/skills}"
+  CODEX_SKILLS_DIRS="${CODEX_SKILLS_DIRS:-}"
   LOG_FILE="${LOG_FILE:-$HOME/.skillmaster/sync.log}"
   EXCLUDED_SKILLS="${EXCLUDED_SKILLS:-skill-creator,gstack}"
   DEBOUNCE_SECONDS="${DEBOUNCE_SECONDS:-0.5}"
+  EXTRA_SKILLS_DIRS="${EXTRA_SKILLS_DIRS:-}"
 
   if [[ -f "$config_file" ]]; then
     # shellcheck source=/dev/null
@@ -22,11 +24,17 @@ load_config() {
   MASTER_DIR="${SKILLMASTER_MASTER_DIR:-$MASTER_DIR}"
   CLAUDE_SKILLS_DIR="${SKILLMASTER_CLAUDE_SKILLS_DIR:-$CLAUDE_SKILLS_DIR}"
   CODEX_SKILLS_DIR="${SKILLMASTER_CODEX_SKILLS_DIR:-$CODEX_SKILLS_DIR}"
+  if [[ -n "${SKILLMASTER_CODEX_SKILLS_DIRS:-}" ]]; then
+    CODEX_SKILLS_DIRS="$SKILLMASTER_CODEX_SKILLS_DIRS"
+  elif [[ -z "$CODEX_SKILLS_DIRS" ]]; then
+    CODEX_SKILLS_DIRS="$CODEX_SKILLS_DIR:${CODEX_HOME:-$HOME/.codex}/skills"
+  fi
   LOG_FILE="${SKILLMASTER_LOG:-$LOG_FILE}"
   EXCLUDED_SKILLS="${SKILLMASTER_EXCLUDES:-$EXCLUDED_SKILLS}"
   DEBOUNCE_SECONDS="${SKILLMASTER_DEBOUNCE_SECONDS:-$DEBOUNCE_SECONDS}"
+  EXTRA_SKILLS_DIRS="${SKILLMASTER_EXTRA_SKILLS_DIRS:-$EXTRA_SKILLS_DIRS}"
 
-  export MASTER_DIR CLAUDE_SKILLS_DIR CODEX_SKILLS_DIR LOG_FILE EXCLUDED_SKILLS DEBOUNCE_SECONDS
+  export MASTER_DIR CLAUDE_SKILLS_DIR CODEX_SKILLS_DIR CODEX_SKILLS_DIRS LOG_FILE EXCLUDED_SKILLS DEBOUNCE_SECONDS EXTRA_SKILLS_DIRS
 }
 
 ensure_parent_dir() {
@@ -69,6 +77,85 @@ is_excluded_skill() {
 
 is_valid_skill_dir() {
   [[ -d "$1" && -f "$1/SKILL.md" ]]
+}
+
+colon_dirs_to_lines() {
+  local dirs="$1"
+  local dir
+  local old_ifs="$IFS"
+  IFS=':'
+  for dir in $dirs; do
+    [[ -n "$dir" ]] && printf '%s\n' "$dir"
+  done
+  IFS="$old_ifs"
+}
+
+unique_dirs() {
+  local dir
+  local seen="
+"
+  while IFS= read -r dir; do
+    [[ -n "$dir" ]] || continue
+    case "$seen" in
+      *"
+$dir
+"*)
+        ;;
+      *)
+        printf '%s\n' "$dir"
+        seen="$seen$dir
+"
+        ;;
+    esac
+  done
+}
+
+codex_skill_dirs() {
+  {
+    printf '%s\n' "$CODEX_SKILLS_DIR"
+    colon_dirs_to_lines "$CODEX_SKILLS_DIRS"
+  } | unique_dirs
+}
+
+tool_skill_dirs() {
+  {
+    printf '%s\n' "$CLAUDE_SKILLS_DIR"
+    codex_skill_dirs
+  } | unique_dirs
+}
+
+skill_destination_dirs() {
+  {
+    printf '%s\n' "$MASTER_DIR"
+    tool_skill_dirs
+  } | unique_dirs
+}
+
+skill_source_dirs() {
+  {
+    skill_destination_dirs
+    colon_dirs_to_lines "$EXTRA_SKILLS_DIRS"
+  } | unique_dirs
+}
+
+ensure_skill_roots() {
+  local dir
+  while IFS= read -r dir; do
+    [[ -n "$dir" ]] && mkdir -p "$dir"
+  done < <(skill_destination_dirs)
+}
+
+join_codex_skill_dirs() {
+  local dir
+  local first=1
+  while IFS= read -r dir; do
+    if [[ "$first" == "1" ]]; then
+      printf '%s' "$dir"
+      first=0
+    else
+      printf ':%s' "$dir"
+    fi
+  done < <(codex_skill_dirs)
 }
 
 hash_path() {
@@ -121,15 +208,15 @@ path_is_under() {
 
 detect_source_dir() {
   local changed_path="$1"
-  if path_is_under "$changed_path" "$MASTER_DIR"; then
-    printf '%s\n' "$MASTER_DIR"
-  elif path_is_under "$changed_path" "$CLAUDE_SKILLS_DIR"; then
-    printf '%s\n' "$CLAUDE_SKILLS_DIR"
-  elif path_is_under "$changed_path" "$CODEX_SKILLS_DIR"; then
-    printf '%s\n' "$CODEX_SKILLS_DIR"
-  else
-    return 1
-  fi
+  local source_dir
+  while IFS= read -r source_dir; do
+    [[ -n "$source_dir" ]] || continue
+    if path_is_under "$changed_path" "$source_dir"; then
+      printf '%s\n' "$source_dir"
+      return 0
+    fi
+  done < <(skill_source_dirs)
+  return 1
 }
 
 copy_skill_dir() {
@@ -154,7 +241,7 @@ sync_skill_from() {
   is_valid_skill_dir "$source_skill" || return 0
 
   src_hash="$(hash_path "$source_skill")"
-  for dest in "$MASTER_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR"; do
+  while IFS= read -r dest; do
     [[ "$dest" == "$source_dir" ]] && continue
     dest_hash="$(hash_path "$dest/$skill_name")"
     [[ "$src_hash" == "$dest_hash" ]] && continue
@@ -165,7 +252,7 @@ sync_skill_from() {
       copy_skill_dir "$source_dir" "$dest" "$skill_name"
       log_msg "Synced $skill_name from $source_dir to $dest"
     fi
-  done
+  done < <(skill_destination_dirs)
 }
 
 regenerate_index() {
@@ -181,8 +268,10 @@ write_config_file() {
 MASTER_DIR="$MASTER_DIR"
 CLAUDE_SKILLS_DIR="$CLAUDE_SKILLS_DIR"
 CODEX_SKILLS_DIR="$CODEX_SKILLS_DIR"
+CODEX_SKILLS_DIRS="$(join_codex_skill_dirs)"
 LOG_FILE="$LOG_FILE"
 EXCLUDED_SKILLS="$EXCLUDED_SKILLS"
 DEBOUNCE_SECONDS="$DEBOUNCE_SECONDS"
+EXTRA_SKILLS_DIRS="$EXTRA_SKILLS_DIRS"
 EOF
 }

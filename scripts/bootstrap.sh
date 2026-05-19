@@ -30,7 +30,7 @@ EOF
   esac
 done
 
-mkdir -p "$MASTER_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR"
+ensure_skill_roots
 
 imported=0
 skipped=0
@@ -76,11 +76,13 @@ import_skill() {
   fi
 }
 
-for source_dir in "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR"; do
+while IFS= read -r source_dir; do
+  [[ "$source_dir" == "$MASTER_DIR" ]] && continue
+  [[ -d "$source_dir" ]] || continue
   while IFS= read -r skill_dir; do
     import_skill "$source_dir" "$(basename "$skill_dir")"
   done < <(find "$source_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
-done
+done < <(skill_source_dirs)
 
 regenerate_index >/dev/null
 

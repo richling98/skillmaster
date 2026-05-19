@@ -12,9 +12,11 @@ export SKILLMASTER_ASSUME_YES=1
 MASTER="$TMP_DIR/master"
 CLAUDE="$TMP_DIR/claude-skills"
 CODEX="$TMP_DIR/codex-skills"
+CODEX_HOME_SKILLS="$TMP_DIR/codex-home/skills"
+EXTRA="$TMP_DIR/project/.agents/skills"
 LOG="$TMP_DIR/sync.log"
 
-mkdir -p "$HOME" "$MASTER" "$CLAUDE" "$CODEX"
+mkdir -p "$HOME" "$MASTER" "$CLAUDE" "$CODEX" "$CODEX_HOME_SKILLS" "$EXTRA"
 
 fail() {
   echo "FAIL: $*" >&2
@@ -53,15 +55,17 @@ write_config() {
 MASTER_DIR="$MASTER"
 CLAUDE_SKILLS_DIR="$CLAUDE"
 CODEX_SKILLS_DIR="$CODEX"
+CODEX_SKILLS_DIRS="$CODEX:$CODEX_HOME_SKILLS"
 LOG_FILE="$LOG"
 EXCLUDED_SKILLS="system-skill,gstack"
 DEBOUNCE_SECONDS="0"
+EXTRA_SKILLS_DIRS="$EXTRA"
 EOF
 }
 
 reset_env() {
-  rm -rf "$MASTER" "$CLAUDE" "$CODEX" "$LOG" "$HOME/.skillmaster"
-  mkdir -p "$HOME" "$MASTER" "$CLAUDE" "$CODEX"
+  rm -rf "$MASTER" "$CLAUDE" "$CODEX" "$CODEX_HOME_SKILLS" "$EXTRA" "$LOG" "$HOME/.skillmaster"
+  mkdir -p "$HOME" "$MASTER" "$CLAUDE" "$CODEX" "$CODEX_HOME_SKILLS" "$EXTRA"
 }
 
 test_generate_index() {
@@ -93,6 +97,7 @@ test_sync_pushes_master_to_tools() {
   "$ROOT_DIR/scripts/sync.sh"
   assert_file "$CLAUDE/sync-me/SKILL.md"
   assert_file "$CODEX/sync-me/SKILL.md"
+  assert_file "$CODEX_HOME_SKILLS/sync-me/SKILL.md"
   assert_not_exists "$CLAUDE/index.html"
   assert_contains "$LOG" "Synced sync-me"
 }
@@ -102,26 +107,46 @@ test_bootstrap_imports_and_excludes() {
   write_config
   write_skill "$CLAUDE" "from-claude" "description: From Claude"
   write_skill "$CODEX" "from-codex" "description: From Codex"
+  write_skill "$CODEX_HOME_SKILLS" "from-codex-home" "description: From Codex Home"
+  write_skill "$EXTRA" "from-extra" "description: From Extra"
   write_skill "$CODEX" "system-skill" "description: Built in"
 
   "$ROOT_DIR/scripts/bootstrap.sh" --yes
 
   assert_file "$MASTER/from-claude/SKILL.md"
   assert_file "$MASTER/from-codex/SKILL.md"
+  assert_file "$MASTER/from-codex-home/SKILL.md"
+  assert_file "$MASTER/from-extra/SKILL.md"
   assert_not_exists "$MASTER/system-skill"
 }
 
 test_watch_once_propagates_and_regenerates_index() {
   reset_env
   write_config
-  write_skill "$CLAUDE" "watch-created" "description: Watch Created"
+  write_skill "$EXTRA" "watch-created" "description: Watch Created"
 
-  "$ROOT_DIR/scripts/watch.sh" --once "$CLAUDE/watch-created/SKILL.md"
+  "$ROOT_DIR/scripts/watch.sh" --once "$EXTRA/watch-created/SKILL.md"
 
   assert_file "$MASTER/watch-created/SKILL.md"
+  assert_file "$CLAUDE/watch-created/SKILL.md"
   assert_file "$CODEX/watch-created/SKILL.md"
+  assert_file "$CODEX_HOME_SKILLS/watch-created/SKILL.md"
   assert_file "$MASTER/index.html"
   assert_contains "$MASTER/index.html" "Watch Created"
+}
+
+test_watch_once_from_codex_home_propagates_everywhere() {
+  reset_env
+  write_config
+  write_skill "$CODEX_HOME_SKILLS" "watch-codex-home" "description: Watch Codex Home"
+
+  "$ROOT_DIR/scripts/watch.sh" --once "$CODEX_HOME_SKILLS/watch-codex-home/SKILL.md"
+
+  assert_file "$MASTER/watch-codex-home/SKILL.md"
+  assert_file "$CLAUDE/watch-codex-home/SKILL.md"
+  assert_file "$CODEX/watch-codex-home/SKILL.md"
+  assert_file "$MASTER/index.html"
+  assert_contains "$MASTER/index.html" "Watch Codex Home"
 }
 
 test_watch_scan_state_writes_records_to_state_file() {
@@ -130,6 +155,8 @@ test_watch_scan_state_writes_records_to_state_file() {
   write_skill "$MASTER" "scan-master" "description: Scan Master"
   write_skill "$CLAUDE" "scan-claude" "description: Scan Claude"
   write_skill "$CODEX" "scan-codex" "description: Scan Codex"
+  write_skill "$CODEX_HOME_SKILLS" "scan-codex-home" "description: Scan Codex Home"
+  write_skill "$EXTRA" "scan-extra" "description: Scan Extra"
 
   "$ROOT_DIR/scripts/watch.sh" --scan-state "$TMP_DIR/watch-state.txt" > "$TMP_DIR/watch-scan.out"
 
@@ -137,7 +164,25 @@ test_watch_scan_state_writes_records_to_state_file() {
   assert_contains "$TMP_DIR/watch-state.txt" "$MASTER|scan-master|"
   assert_contains "$TMP_DIR/watch-state.txt" "$CLAUDE|scan-claude|"
   assert_contains "$TMP_DIR/watch-state.txt" "$CODEX|scan-codex|"
+  assert_contains "$TMP_DIR/watch-state.txt" "$CODEX_HOME_SKILLS|scan-codex-home|"
+  assert_contains "$TMP_DIR/watch-state.txt" "$EXTRA|scan-extra|"
   [[ ! -s "$TMP_DIR/watch-scan.out" ]] || fail "scan_state should not write records to stdout"
+}
+
+test_master_delete_removes_all_tool_copies() {
+  reset_env
+  write_config
+  write_skill "$MASTER" "delete-everywhere" "description: Delete Everywhere"
+  write_skill "$CLAUDE" "delete-everywhere" "description: Delete Everywhere"
+  write_skill "$CODEX" "delete-everywhere" "description: Delete Everywhere"
+  write_skill "$CODEX_HOME_SKILLS" "delete-everywhere" "description: Delete Everywhere"
+  rm -rf "$MASTER/delete-everywhere"
+
+  "$ROOT_DIR/scripts/watch.sh" --once "$MASTER/delete-everywhere/SKILL.md"
+
+  assert_not_exists "$CLAUDE/delete-everywhere"
+  assert_not_exists "$CODEX/delete-everywhere"
+  assert_not_exists "$CODEX_HOME_SKILLS/delete-everywhere"
 }
 
 test_hash_path_treats_unreadable_files_as_missing() {
@@ -168,13 +213,14 @@ test_setup_and_uninstall_preserve_master() {
   reset_env
   write_skill "$CLAUDE" "setup-import" "description: Setup Import"
 
-  "$ROOT_DIR/setup.sh" --non-interactive --master "$MASTER" --claude "$CLAUDE" --codex "$CODEX" --no-service
+  SKILLMASTER_CODEX_SKILLS_DIRS="$CODEX:$CODEX_HOME_SKILLS" "$ROOT_DIR/setup.sh" --non-interactive --master "$MASTER" --claude "$CLAUDE" --codex "$CODEX" --no-service
 
   assert_file "$SKILLMASTER_CONFIG"
   assert_file "$MASTER/setup-import/SKILL.md"
   assert_file "$MASTER/index.html"
   assert_file "$CLAUDE/add-new-skill/SKILL.md"
   assert_file "$CODEX/add-new-skill/SKILL.md"
+  assert_file "$CODEX_HOME_SKILLS/add-new-skill/SKILL.md"
 
   "$ROOT_DIR/scripts/uninstall.sh" --yes
   assert_file "$MASTER/setup-import/SKILL.md"
@@ -215,7 +261,9 @@ main() {
   test_sync_pushes_master_to_tools
   test_bootstrap_imports_and_excludes
   test_watch_once_propagates_and_regenerates_index
+  test_watch_once_from_codex_home_propagates_everywhere
   test_watch_scan_state_writes_records_to_state_file
+  test_master_delete_removes_all_tool_copies
   test_hash_path_treats_unreadable_files_as_missing
   test_tool_delete_does_not_remove_master
   test_setup_and_uninstall_preserve_master

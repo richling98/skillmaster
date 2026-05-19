@@ -11,9 +11,11 @@ NO_SERVICE=0
 MASTER_DIR="${SKILLMASTER_MASTER_DIR:-$HOME/skills}"
 CLAUDE_SKILLS_DIR="${SKILLMASTER_CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}"
 CODEX_SKILLS_DIR="${SKILLMASTER_CODEX_SKILLS_DIR:-$HOME/.agents/skills}"
+CODEX_SKILLS_DIRS="${SKILLMASTER_CODEX_SKILLS_DIRS:-}"
 LOG_FILE="${SKILLMASTER_LOG:-$HOME/.skillmaster/sync.log}"
 EXCLUDED_SKILLS="${SKILLMASTER_EXCLUDES:-skill-creator,gstack}"
 DEBOUNCE_SECONDS="${SKILLMASTER_DEBOUNCE_SECONDS:-0.5}"
+EXTRA_SKILLS_DIRS="${SKILLMASTER_EXTRA_SKILLS_DIRS:-}"
 
 trim_input() {
   local value="$1"
@@ -142,19 +144,26 @@ else
   validate_master_dir "$MASTER_DIR"
 fi
 
-export MASTER_DIR CLAUDE_SKILLS_DIR CODEX_SKILLS_DIR LOG_FILE EXCLUDED_SKILLS DEBOUNCE_SECONDS
+if [[ -z "$CODEX_SKILLS_DIRS" ]]; then
+  CODEX_SKILLS_DIRS="$CODEX_SKILLS_DIR:${CODEX_HOME:-$HOME/.codex}/skills"
+fi
+
+export MASTER_DIR CLAUDE_SKILLS_DIR CODEX_SKILLS_DIR CODEX_SKILLS_DIRS LOG_FILE EXCLUDED_SKILLS DEBOUNCE_SECONDS EXTRA_SKILLS_DIRS
 
 CONFIG_FILE="${SKILLMASTER_CONFIG:-$HOME/.skillmaster/config}"
 write_config_file "$CONFIG_FILE"
 
-mkdir -p "$MASTER_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR"
+ensure_skill_roots
 
 "$ROOT_DIR/scripts/bootstrap.sh" --yes
 
-mkdir -p "$MASTER_DIR/add-new-skill" "$CLAUDE_SKILLS_DIR/add-new-skill" "$CODEX_SKILLS_DIR/add-new-skill"
+mkdir -p "$MASTER_DIR/add-new-skill" "$CLAUDE_SKILLS_DIR/add-new-skill"
 cp "$ROOT_DIR/skills/add-new-skill/SKILL.md" "$MASTER_DIR/add-new-skill/SKILL.md"
 cp "$ROOT_DIR/skills/add-new-skill/SKILL.md" "$CLAUDE_SKILLS_DIR/add-new-skill/SKILL.md"
-cp "$ROOT_DIR/skills/add-new-skill/SKILL.md" "$CODEX_SKILLS_DIR/add-new-skill/SKILL.md"
+while IFS= read -r codex_dir; do
+  mkdir -p "$codex_dir/add-new-skill"
+  cp "$ROOT_DIR/skills/add-new-skill/SKILL.md" "$codex_dir/add-new-skill/SKILL.md"
+done < <(codex_skill_dirs)
 
 "$ROOT_DIR/scripts/generate-index.sh" "$MASTER_DIR" >/dev/null
 
@@ -166,7 +175,12 @@ cat <<EOF
 SkillMaster setup complete.
 Master folder: $MASTER_DIR
 Claude skills: $CLAUDE_SKILLS_DIR
-Codex skills: $CODEX_SKILLS_DIR
+Codex skills:
+EOF
+while IFS= read -r codex_dir; do
+  printf '  %s\n' "$codex_dir"
+done < <(codex_skill_dirs)
+cat <<EOF
 Skill library: $MASTER_DIR/index.html
 Config: $CONFIG_FILE
 EOF

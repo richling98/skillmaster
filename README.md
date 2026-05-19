@@ -16,21 +16,24 @@ Say goodbye to copying .md skill files from Codex to Claude (or vice versa). Wit
 ```mermaid
 flowchart LR
   claude["Claude Code<br/>~/.claude/skills"]
-  codex["Codex<br/>~/.agents/skills"]
+  codexAgents["Codex<br/>~/.agents/skills"]
+  codexHome["Codex home<br/>~/.codex/skills"]
   brain["Your local skills brain<br/>Master folder"]
   library["Shareable local library<br/>index.html"]
 
   claude <--> brain
-  codex <--> brain
+  codexAgents <--> brain
+  codexHome <--> brain
   brain --> library
 ```
 
-SkillMaster continuously monitors three places:
+SkillMaster continuously monitors these places:
 
 | Place | Purpose |
 | --- | --- |
-| Claude Code skills (.claude/skills) | Where Claude Code reads skills. |
-| Codex skills (.agents/skills and .codex/skills) | Where Codex reads skills. |
+| Claude Code skills (`.claude/skills`) | Where Claude Code reads skills. |
+| Codex agent skills (`.agents/skills`) | Where Codex reads agent skills. |
+| Codex home skills (`.codex/skills`) | Where Codex and Codex skill installers can store global skills. |
 | Your master folder | Your local folder for all skills. |
 
 When you add or edit a skill in any of those places, SkillMaster syncs the change everywhere else. Create a skill anywhere, sync it everywhere. 
@@ -142,7 +145,8 @@ open "$MASTER_DIR/index.html"
 | --- | --- |
 | Your chosen master folder | Local source of truth for every skill. |
 | `~/.claude/skills` | Claude Code skill folder. |
-| `~/.agents/skills` | Codex skill folder. |
+| `~/.agents/skills` | Codex agent skills folder. |
+| `~/.codex/skills` | Codex home skills folder. |
 | `~/.skillmaster/config` | SkillMaster configuration. |
 | `~/.skillmaster/runtime/scripts` | Runtime copy used by the background watcher. |
 | `$MASTER_DIR/index.html` | Local website for browsing and copying skills. |
@@ -157,6 +161,7 @@ Create or edit a skill in any of these places:
 $MASTER_DIR/<skill-name>/SKILL.md
 ~/.claude/skills/<skill-name>/SKILL.md
 ~/.agents/skills/<skill-name>/SKILL.md
+~/.codex/skills/<skill-name>/SKILL.md
 ```
 
 SkillMaster syncs the change to the other locations.
@@ -175,7 +180,8 @@ SkillMaster syncs the change to the other locations.
 | Add/edit in Claude Code | Syncs to Codex and master folder. |
 | Add/edit in Codex | Syncs to Claude Code and master folder. |
 | Add/edit in master folder | Syncs to Claude Code and Codex. |
-| Delete from master folder | Deletes tool copies. |
+| Add/edit in an extra inbox folder | Syncs to master, Claude Code, and Codex. |
+| Delete from master folder | Deletes Claude and Codex tool copies. |
 | Delete from Claude or Codex | Master copy is preserved. |
 | Update `index.html` | Ignored by watcher to avoid loops. |
 
@@ -193,12 +199,31 @@ Example:
 MASTER_DIR="$HOME/skills"
 CLAUDE_SKILLS_DIR="$HOME/.claude/skills"
 CODEX_SKILLS_DIR="$HOME/.agents/skills"
+CODEX_SKILLS_DIRS="$HOME/.agents/skills:$HOME/.codex/skills"
 LOG_FILE="$HOME/.skillmaster/sync.log"
 EXCLUDED_SKILLS="skill-creator,gstack"
 DEBOUNCE_SECONDS="0.5"
+EXTRA_SKILLS_DIRS=""
 ```
 
 If you move folders, edit this file and restart the watcher.
+
+`CODEX_SKILLS_DIRS` is the full list of Codex folders SkillMaster keeps in sync. It is colon-separated. `CODEX_SKILLS_DIR` remains in the config for older installs and scripts.
+
+`EXTRA_SKILLS_DIRS` is for tools that install skills somewhere else, such as a project-local `.agents/skills` folder. Use colon-separated absolute paths:
+
+```bash
+EXTRA_SKILLS_DIRS="/path/to/project/.agents/skills:/another/inbox/skills"
+```
+
+SkillMaster treats those folders as inboxes. Skills created there are copied into the canonical folders:
+
+```text
+/Users/rling/skillmaster
+/Users/rling/.claude/skills
+/Users/rling/.agents/skills
+/Users/rling/.codex/skills
+```
 
 macOS:
 
@@ -268,6 +293,7 @@ Wait 5-10 seconds:
 ```bash
 test -f "$HOME/.claude/skills/manual-master-test/SKILL.md" && echo "Claude copy exists"
 test -f "$HOME/.agents/skills/manual-master-test/SKILL.md" && echo "Codex copy exists"
+test -f "$HOME/.codex/skills/manual-master-test/SKILL.md" && echo "Codex home copy exists"
 ```
 
 ## Troubleshooting

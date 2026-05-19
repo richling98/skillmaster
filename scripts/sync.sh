@@ -31,7 +31,7 @@ EOF
   esac
 done
 
-mkdir -p "$MASTER_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR"
+ensure_skill_roots
 
 if [[ -n "$SKILL_FILTER" ]]; then
   sync_skill_from "$MASTER_DIR" "$SKILL_FILTER" "$DRY_RUN"

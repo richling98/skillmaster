@@ -26,7 +26,9 @@ handle_event() {
   if [[ ! -d "$source_dir/$skill_name" ]]; then
     if [[ "$source_dir" == "$MASTER_DIR" ]]; then
       if confirm "Propagate deletion of $skill_name from master to Claude Code and Codex?"; then
-        rm -rf -- "$CLAUDE_SKILLS_DIR/$skill_name" "$CODEX_SKILLS_DIR/$skill_name"
+        while IFS= read -r tool_dir; do
+          rm -rf -- "$tool_dir/$skill_name"
+        done < <(tool_skill_dirs)
         log_msg "Deleted $skill_name from tool directories after master deletion"
         regenerate_index >/dev/null
       else
@@ -57,7 +59,7 @@ scan_state() {
 
   ensure_parent_dir "$output"
   {
-    for source_dir in "$MASTER_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR"; do
+    while IFS= read -r source_dir; do
       [[ -d "$source_dir" ]] || continue
       while IFS= read -r skill_dir; do
         skill_name="$(basename "$skill_dir")"
@@ -67,7 +69,7 @@ scan_state() {
         skill_hash="$(hash_path "$skill_dir/SKILL.md")"
         printf '%s|%s|%s\n' "$source_dir" "$skill_name" "$skill_hash"
       done < <(find "$source_dir" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | sort)
-    done
+    done < <(skill_source_dirs)
   } > "$temp_output"
   mv "$temp_output" "$output"
 }
@@ -135,7 +137,7 @@ if [[ "${1:-}" == "--scan-state" ]]; then
   exit 0
 fi
 
-mkdir -p "$MASTER_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR"
+ensure_skill_roots
 
 if [[ "${SKILLMASTER_WATCH_MODE:-}" == "poll" ]]; then
   poll_loop
@@ -144,11 +146,19 @@ fi
 log_msg "Starting SkillMaster watcher in fswatch mode"
 
 if command -v fswatch >/dev/null 2>&1; then
-  fswatch -r "$MASTER_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR" | while IFS= read -r changed_path; do
+  watch_dirs=()
+  while IFS= read -r watch_dir; do
+    [[ -d "$watch_dir" ]] && watch_dirs+=("$watch_dir")
+  done < <(skill_source_dirs)
+  fswatch -r "${watch_dirs[@]}" | while IFS= read -r changed_path; do
     handle_event "$changed_path"
   done
 elif command -v inotifywait >/dev/null 2>&1; then
-  inotifywait -m -r -e create,modify,delete,move --format '%w%f' "$MASTER_DIR" "$CLAUDE_SKILLS_DIR" "$CODEX_SKILLS_DIR" | while IFS= read -r changed_path; do
+  watch_dirs=()
+  while IFS= read -r watch_dir; do
+    [[ -d "$watch_dir" ]] && watch_dirs+=("$watch_dir")
+  done < <(skill_source_dirs)
+  inotifywait -m -r -e create,modify,delete,move --format '%w%f' "${watch_dirs[@]}" | while IFS= read -r changed_path; do
     handle_event "$changed_path"
   done
 else

@@ -1,6 +1,6 @@
 # SkillMaster
 
-Say goodbye to copying .md skill files from Codex to Claude or vice versa. With SkillMaster, you can create a skill once, and it will sync to Claude and Codex. SkillMaster also creates a local folder that stores all of your skills — complete with your own website for all of your skills (as an .html file), so that you can easily browse, copy, and share your skills anywhere. 
+Say goodbye to copying .md skill files from Codex to Claude (or vice versa). With SkillMaster, you create a skill once, and it syncs to Claude and Codex. SkillMaster also creates a local folder that stores all of your skills — complete with your own website for all of your skills (as an .html file), so that you can easily browse, copy, and share your skills anywhere. 
 
 ## The Value
 
@@ -25,13 +25,13 @@ flowchart LR
   brain --> library
 ```
 
-SkillMaster watches three places:
+SkillMaster continuously monitors three places:
 
 | Place | Purpose |
 | --- | --- |
-| Claude Code skills | Where Claude Code reads skills. |
-| Codex skills | Where Codex reads skills. |
-| Your master folder | Your private source of truth for all skills. |
+| Claude Code skills (.claude/skills) | Where Claude Code reads skills. |
+| Codex skills (.agents/skills and .codex/skills) | Where Codex reads skills. |
+| Your master folder | Your local folder for all skills. |
 
 When you add or edit a skill in any of those places, SkillMaster syncs the change everywhere else. Create a skill anywhere, sync it everywhere. 
 

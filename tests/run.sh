@@ -124,6 +124,34 @@ test_watch_once_propagates_and_regenerates_index() {
   assert_contains "$MASTER/index.html" "Watch Created"
 }
 
+test_watch_scan_state_writes_records_to_state_file() {
+  reset_env
+  write_config
+  write_skill "$MASTER" "scan-master" "description: Scan Master"
+  write_skill "$CLAUDE" "scan-claude" "description: Scan Claude"
+  write_skill "$CODEX" "scan-codex" "description: Scan Codex"
+
+  "$ROOT_DIR/scripts/watch.sh" --scan-state "$TMP_DIR/watch-state.txt" > "$TMP_DIR/watch-scan.out"
+
+  assert_file "$TMP_DIR/watch-state.txt"
+  assert_contains "$TMP_DIR/watch-state.txt" "$MASTER|scan-master|"
+  assert_contains "$TMP_DIR/watch-state.txt" "$CLAUDE|scan-claude|"
+  assert_contains "$TMP_DIR/watch-state.txt" "$CODEX|scan-codex|"
+  [[ ! -s "$TMP_DIR/watch-scan.out" ]] || fail "scan_state should not write records to stdout"
+}
+
+test_hash_path_treats_unreadable_files_as_missing() {
+  reset_env
+  unreadable="$TMP_DIR/unreadable-skill.md"
+  printf 'cannot read this\n' > "$unreadable"
+  chmod 000 "$unreadable"
+
+  bash -lc 'source "$1/scripts/common.sh"; hash_path "$2"' _ "$ROOT_DIR" "$unreadable" > "$TMP_DIR/unreadable-hash.txt"
+
+  assert_contains "$TMP_DIR/unreadable-hash.txt" "missing"
+  chmod 600 "$unreadable"
+}
+
 test_tool_delete_does_not_remove_master() {
   reset_env
   write_config
@@ -187,6 +215,8 @@ main() {
   test_sync_pushes_master_to_tools
   test_bootstrap_imports_and_excludes
   test_watch_once_propagates_and_regenerates_index
+  test_watch_scan_state_writes_records_to_state_file
+  test_hash_path_treats_unreadable_files_as_missing
   test_tool_delete_does_not_remove_master
   test_setup_and_uninstall_preserve_master
   test_interactive_default_uses_home_skills

@@ -73,21 +73,37 @@ is_valid_skill_dir() {
 
 hash_path() {
   local path="$1"
+  local raw_checksum
+  local file_checksum
   if [[ ! -e "$path" ]]; then
     printf 'missing'
     return 0
   fi
   if [[ -f "$path" ]]; then
-    cksum "$path" | awk '{print $1 ":" $2}'
+    raw_checksum="$(cksum "$path" 2>/dev/null || true)"
+    if [[ "$raw_checksum" =~ ^([0-9]+)[[:space:]]+([0-9]+) ]]; then
+      printf '%s:%s' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+    else
+      printf 'missing'
+    fi
     return 0
   fi
-  (
-    cd "$path" || exit 1
-    find . -type f ! -name '.DS_Store' -print | sort | while IFS= read -r file; do
-      printf '%s ' "$file"
-      cksum "$file"
-    done
-  ) | cksum | awk '{print $1 ":" $2}'
+  raw_checksum="$(
+    (
+      cd "$path" 2>/dev/null || exit 1
+      find . -type f ! -name '.DS_Store' -print 2>/dev/null | sort | while IFS= read -r file; do
+        [[ -f "$file" ]] || continue
+        file_checksum="$(cksum "$file" 2>/dev/null || true)"
+        [[ -n "$file_checksum" ]] || continue
+        printf '%s %s\n' "$file" "$file_checksum"
+      done
+    ) | cksum 2>/dev/null || true
+  )"
+  if [[ "$raw_checksum" =~ ^([0-9]+)[[:space:]]+([0-9]+) ]]; then
+    printf '%s:%s' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+  else
+    printf 'missing'
+  fi
 }
 
 skill_name_from_path() {

@@ -39,10 +39,6 @@ WATCH_PROGRAM="$RUNTIME_SCRIPTS_DIR/watch.sh"
 
 case "$(uname -s)" in
   Darwin)
-    if ! command -v fswatch >/dev/null 2>&1; then
-      printf 'Missing dependency: fswatch. Install with: brew install fswatch\n' >&2
-      exit 1
-    fi
     plist="$HOME/Library/LaunchAgents/com.skillmaster.watcher.plist"
     mkdir -p "$(dirname "$plist")"
     cat > "$plist" <<EOF
@@ -62,6 +58,10 @@ case "$(uname -s)" in
     <string>${SKILLMASTER_CONFIG:-$HOME/.skillmaster/config}</string>
     <key>PATH</key>
     <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>SKILLMASTER_WATCH_MODE</key>
+    <string>poll</string>
+    <key>SKILLMASTER_ASSUME_YES</key>
+    <string>1</string>
   </dict>
   <key>RunAtLoad</key>
   <true/>
@@ -82,10 +82,6 @@ EOF
     printf 'Runtime scripts copied to %s\n' "$RUNTIME_SCRIPTS_DIR"
     ;;
   Linux)
-    if ! command -v inotifywait >/dev/null 2>&1; then
-      printf 'Missing dependency: inotifywait. Install with: sudo apt install inotify-tools\n' >&2
-      exit 1
-    fi
     service_dir="$HOME/.config/systemd/user"
     service="$service_dir/skillmaster.service"
     mkdir -p "$service_dir"
@@ -97,6 +93,8 @@ Description=SkillMaster watcher
 Type=simple
 Environment=SKILLMASTER_CONFIG=${SKILLMASTER_CONFIG:-$HOME/.skillmaster/config}
 Environment=PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+Environment=SKILLMASTER_WATCH_MODE=poll
+Environment=SKILLMASTER_ASSUME_YES=1
 ExecStart=$WATCH_PROGRAM
 Restart=always
 RestartSec=2

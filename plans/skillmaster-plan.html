@@ -708,11 +708,12 @@
   <h2><span class="section-num">04</span> How the Watcher Works</h2>
   <p class="section-desc">A technical deep-dive — and an honest assessment of whether it will actually hold up</p>
 
-  <!-- Layer 1: OS API -->
-  <h3>Layer 1 — The OS file system API</h3>
+  <!-- Layer 1: Polling service -->
+  <h3>Layer 1 — Reliable polling service</h3>
   <p>
-    The watcher doesn't poll files on a timer (that would be slow and wasteful). Instead it hooks into the operating system's
-    own file event infrastructure, which emits notifications the instant a file is written to disk.
+    The installed watcher uses a small polling loop by default. Every pass records the visible skill folders and
+    <code>SKILL.md</code> checksums for the master, Claude Code, and Codex directories, then syncs the first meaningful
+    create, edit, or deletion it detects. This avoids macOS privacy failures from event APIs following protected paths.
   </p>
   <div class="cards" style="margin-top:16px; margin-bottom:28px;">
     <div class="card">
@@ -730,25 +731,25 @@
     </div>
   </div>
 
-  <!-- Layer 2: fswatch -->
-  <h3>Layer 2 — fswatch sitting on top</h3>
+  <!-- Layer 2: foreground events -->
+  <h3>Layer 2 — optional foreground file events</h3>
   <p>
-    <code>fswatch</code> is installed via <code>brew install fswatch</code> (macOS) or <code>apt install inotify-tools</code> (Linux).
-    It lets you watch <strong>multiple directories in a single command</strong> and pipes changed file paths to stdout, one per line.
-    The watcher script reads this stream in a loop and acts on each event.
+    For manual foreground debugging, <code>scripts/watch.sh</code> can still use <code>fswatch</code> on macOS or
+    <code>inotifywait</code> on Linux when those tools are installed. The permanent launchd/systemd service runs in
+    polling mode so normal setup does not require either dependency.
   </p>
   <pre>
 # What the core watcher command looks like
-fswatch -r -L \
+fswatch -r \
     "$MASTER_DIR" \
     "$HOME/.claude/skills" \
     "$HOME/.agents/skills" | while IFS= read -r changed_path; do
     handle_event "$changed_path"
 done</pre>
   <p style="margin-top:12px">
-    The <code>-r</code> flag makes it recursive (watches subdirectories). The <code>-L</code> flag follows symlinks,
-    which matters because Claude Code's skills directory contains symlinks (e.g. <code>gstack/</code> variants).
-    The pipe feeds each changed path into a bash handler function.
+    The <code>-r</code> flag makes it recursive (watches subdirectories). The watcher does <strong>not</strong>
+    follow symlinks because Claude Code's skills directory contains many symlinks into larger tool trees, and
+    following those can trigger macOS privacy errors. The pipe feeds each changed path into a bash handler function.
   </p>
 
   <!-- Layer 3: Event handler -->
@@ -885,8 +886,8 @@ fi</pre>
       </tr>
       <tr>
         <td>Symlinks in <code>~/.claude/skills/</code></td>
-        <td>Watcher follows symlink into <code>gstack/</code> and tries to sync those skills</td>
-        <td><code>-L</code> flag follows symlinks for watching, but skill detection validates that <code>SKILL.md</code> exists in the immediate subfolder. Symlinks pointing into nested structures won't match.</td>
+        <td>Watcher follows symlink into <code>gstack/</code> and hits protected or irrelevant nested paths</td>
+        <td>Do not pass <code>-L</code> to <code>fswatch</code>. Real skill directories are watched recursively; symlinked tool trees are left alone.</td>
       </tr>
       <tr>
         <td>System/built-in skills</td>
@@ -991,7 +992,7 @@ fi</pre>
     <div class="tag">⚙️ Tooling only — works with any skill content</div>
     <div class="tag">🌐 Local index.html generated inside the user's master folder</div>
     <div class="tag">🍎 macOS + Linux support</div>
-    <div class="tag">📦 Zero dependencies (bash + fswatch/inotify)</div>
+    <div class="tag">📦 Zero required watcher dependencies beyond bash + standard Unix tools</div>
   </div>
 </section>
 
@@ -1028,7 +1029,7 @@ fi</pre>
         <strong style="color:#e2e8f0">The heart of SkillMaster — bidirectional auto-sync.</strong> Runs continuously in the background.
         <ul>
           <li>Watches all three directories simultaneously: master folder, <code>~/.claude/skills/</code>, and <code>~/.agents/skills/</code></li>
-          <li>Uses <code>fswatch</code> on macOS and <code>inotifywait</code> on Linux</li>
+          <li>Installed services use polling mode for reliability; foreground debugging can use <code>fswatch</code> or <code>inotifywait</code> when present</li>
           <li>On any file creation or modification, determines the source and propagates to the other two</li>
           <li>Debounces rapid changes (e.g. editor saving multiple times) so it only syncs once per edit</li>
           <li>Logs all sync events to <code>~/.skillmaster/sync.log</code> for debugging</li>
@@ -1066,7 +1067,7 @@ fi</pre>
         <ul>
           <li>On macOS: installs a <code>launchd</code> plist to <code>~/Library/LaunchAgents/</code>, starts it immediately</li>
           <li>On Linux: installs a <code>systemd --user</code> service, enables and starts it</li>
-          <li>Checks that <code>fswatch</code> / <code>inotifywait</code> is installed; if not, offers to install via Homebrew / apt</li>
+          <li>Copies runtime scripts into <code>~/.skillmaster/runtime/scripts/</code> and runs the service in polling mode</li>
           <li>After install, the watcher survives reboots with no manual intervention</li>
         </ul>
       </div>

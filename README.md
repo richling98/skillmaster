@@ -21,8 +21,8 @@ The public repo contains tooling only. Your personal skills stay in your configu
 
 SkillMaster is designed for:
 
-- macOS with `launchd` and `fswatch`
-- Linux with `systemd --user` and `inotifywait`
+- macOS with `launchd`
+- Linux with `systemd --user`
 
 The scripts are written in Bash and use standard Unix tools.
 
@@ -64,22 +64,7 @@ $MASTER_DIR/
 
 These are already available on a normal macOS or Linux development machine.
 
-### Required for Background Sync
-
-On macOS:
-
-```bash
-brew install fswatch
-```
-
-On Debian/Ubuntu Linux:
-
-```bash
-sudo apt update
-sudo apt install inotify-tools
-```
-
-You can still run `bootstrap.sh`, `sync.sh`, and `generate-index.sh` without the background watcher dependency.
+The installed background watcher uses polling mode by default, so there is no Homebrew or apt watcher dependency required for normal setup. If you run `scripts/watch.sh` manually in the foreground without polling mode, it can use `fswatch` on macOS or `inotifywait` on Linux when those tools are installed.
 
 ## Install From GitHub
 
@@ -296,7 +281,7 @@ Use this when debugging. Keep the terminal open.
 scripts/install-watcher.sh
 ```
 
-This copies runtime scripts to `~/.skillmaster/runtime/scripts/`, points launchd/systemd at that copy, and gives the service a PATH that includes common Homebrew locations such as `/opt/homebrew/bin`.
+This copies runtime scripts to `~/.skillmaster/runtime/scripts/`, points launchd/systemd at that copy, gives the service a PATH that includes common Homebrew locations such as `/opt/homebrew/bin`, and runs the service in polling mode so it does not depend on macOS file-event permissions.
 
 Install but do not start:
 
@@ -326,7 +311,7 @@ The watcher observes:
 - `~/.claude/skills`
 - `~/.agents/skills`
 
-When a skill is created or edited in any watched folder, SkillMaster syncs it to the other locations.
+When a skill is created or edited in any watched folder, SkillMaster syncs it to the other locations. Installed services use polling mode for reliability; foreground `scripts/watch.sh` still uses native file events when available.
 
 Loop prevention uses checksums. If source and destination content already match, no copy happens.
 
@@ -550,35 +535,6 @@ The integration tests create temporary fake master, Claude, and Codex skill fold
 
 ## Troubleshooting
 
-### `fswatch` is missing on macOS
-
-Install it:
-
-```bash
-brew install fswatch
-```
-
-Then reinstall or restart the watcher:
-
-```bash
-scripts/install-watcher.sh
-```
-
-### `inotifywait` is missing on Linux
-
-Install it:
-
-```bash
-sudo apt update
-sudo apt install inotify-tools
-```
-
-Then reinstall or restart the watcher:
-
-```bash
-scripts/install-watcher.sh
-```
-
 ### The watcher is not syncing
 
 Check config:
@@ -591,6 +547,15 @@ Check logs:
 
 ```bash
 tail -n 100 ~/.skillmaster/sync.log
+tail -n 100 ~/.skillmaster/watcher.err.log
+```
+
+Confirm the poller can see your skills:
+
+```bash
+~/.skillmaster/runtime/scripts/watch.sh --scan-state /tmp/skillmaster-state.txt
+wc -l /tmp/skillmaster-state.txt
+head /tmp/skillmaster-state.txt
 ```
 
 Run the watcher in the foreground:

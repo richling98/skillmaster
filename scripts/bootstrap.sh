@@ -42,6 +42,7 @@ import_skill() {
   local source_skill="$source_dir/$skill_name"
   local master_skill="$MASTER_DIR/$skill_name"
 
+  [[ "$skill_name" == .* ]] && { skipped=$((skipped + 1)); return 0; }
   is_excluded_skill "$skill_name" && { skipped=$((skipped + 1)); return 0; }
   is_valid_skill_dir "$source_skill" || return 0
 

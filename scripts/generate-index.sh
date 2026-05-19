@@ -26,6 +26,7 @@ html_escape_string() {
 metadata_value() {
   local file="$1"
   local key="$2"
+  [[ -f "$file" ]] || return 0
   awk -v key="$key" '
     BEGIN { in_frontmatter = 0 }
     NR == 1 && $0 == "---" { in_frontmatter = 1; next }
@@ -40,11 +41,15 @@ metadata_value() {
         exit
       }
     }
-  ' "$file"
+  ' "$file" 2>/dev/null || true
 }
 
 updated_time() {
   local path="$1"
+  [[ -e "$path" ]] || {
+    printf 'unknown'
+    return 0
+  }
   if stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$path" >/dev/null 2>&1; then
     stat -f '%Sm' -t '%Y-%m-%d %H:%M' "$path"
   else
@@ -149,6 +154,9 @@ while IFS= read -r skill_dir; do
   is_excluded_skill "$skill_name" && continue
 
   skill_file="$skill_dir/SKILL.md"
+  [[ -f "$skill_file" ]] || continue
+  skill_content="$(cat "$skill_file" 2>/dev/null || true)"
+  [[ -n "$skill_content" || -f "$skill_file" ]] || continue
   title="$(metadata_value "$skill_file" "name")"
   description="$(metadata_value "$skill_file" "description")"
   [[ -n "$title" ]] || title="$skill_name"
@@ -172,10 +180,10 @@ while IFS= read -r skill_dir; do
     printf '    <div class="actions"><button type="button" onclick="copySkill('\''%s'\'', this)">Copy</button></div>\n' "$id"
     printf '  </div>\n'
     printf '  <details><summary>View skill</summary><pre>'
-    html_escape < "$skill_file"
+    html_escape_string "$skill_content"
     printf '</pre></details>\n'
     printf '  <textarea id="%s">' "$id"
-    html_escape < "$skill_file"
+    html_escape_string "$skill_content"
     printf '</textarea>\n'
     printf '</article>\n'
   } >> "$OUT"

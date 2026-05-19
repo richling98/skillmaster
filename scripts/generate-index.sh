@@ -69,30 +69,26 @@ cat > "$OUT" <<'HTML'
   <style>
     :root {
       color-scheme: dark;
-      --bg: #050507;
-      --surface: rgba(28, 28, 30, 0.78);
-      --surface-strong: rgba(22, 22, 24, 0.96);
-      --text: #f5f5f7;
-      --muted: #a1a1a6;
-      --quiet: #73737a;
-      --line: rgba(255, 255, 255, 0.14);
-      --line-soft: rgba(255, 255, 255, 0.08);
-      --blue: #0a84ff;
-      --blue-hover: #409cff;
-      --green: #30d158;
-      --code-bg: #101013;
-      --shadow: 0 22px 55px rgba(0, 0, 0, 0.42);
+      --bg: #000000;
+      --surface: #0f0f10;
+      --surface-strong: #121214;
+      --text: #f5f5f5;
+      --muted: #a3a3a3;
+      --quiet: #737373;
+      --line: #2a2a2c;
+      --line-soft: #1d1d1f;
+      --blue: #2997ff;
+      --blue-hover: #5eb0ff;
+      --green: #2fbf5b;
+      --code-bg: #080809;
+      --shadow: none;
     }
     * { box-sizing: border-box; }
     html { background: var(--bg); }
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at 18% -12%, rgba(10, 132, 255, 0.28), transparent 32%),
-        radial-gradient(circle at 92% 0%, rgba(48, 209, 88, 0.13), transparent 28%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 34%),
-        var(--bg);
+      background: var(--bg);
       color: var(--text);
       line-height: 1.45;
       -webkit-font-smoothing: antialiased;
@@ -134,10 +130,10 @@ cat > "$OUT" <<'HTML'
       z-index: 10;
       margin: 4px 0 22px;
       padding: 12px 0;
-      background: rgba(5, 5, 7, 0.78);
+      background: rgba(0, 0, 0, 0.88);
       backdrop-filter: blur(22px);
       -webkit-backdrop-filter: blur(22px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 1px solid var(--line-soft);
     }
     .toolbar {
       display: grid;
@@ -178,16 +174,16 @@ cat > "$OUT" <<'HTML'
       padding: 0 14px 0 43px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: rgba(28, 28, 30, 0.86);
+      background: #0b0b0c;
       color: var(--text);
       font-size: 14px;
       outline: none;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+      box-shadow: none;
       appearance: none;
     }
     input[type="search"]:focus {
-      border-color: rgba(10, 132, 255, 0.62);
-      box-shadow: 0 0 0 4px rgba(10, 132, 255, 0.18);
+      border-color: var(--blue);
+      box-shadow: none;
     }
     .result-count {
       color: var(--muted);
@@ -204,12 +200,12 @@ cat > "$OUT" <<'HTML'
       background: var(--surface-strong);
       border-radius: 8px;
       overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+      box-shadow: none;
       transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
     }
     .skill:hover {
-      border-color: rgba(10, 132, 255, 0.34);
-      box-shadow: var(--shadow);
+      border-color: #3a3a3c;
+      box-shadow: none;
       transform: translateY(-1px);
     }
     .skill-header {
@@ -273,7 +269,7 @@ cat > "$OUT" <<'HTML'
     }
     button:hover {
       background: var(--blue-hover);
-      box-shadow: 0 8px 18px rgba(0, 102, 204, 0.22);
+      box-shadow: none;
       transform: translateY(-1px);
     }
     button.copied {
@@ -298,7 +294,7 @@ cat > "$OUT" <<'HTML'
       padding: 18px 22px 24px;
       overflow-x: auto;
       border-top: 1px solid var(--line-soft);
-      background: #0b0b0d;
+      background: var(--code-bg);
       color: #e8e8ed;
       font-size: 13px;
       line-height: 1.58;

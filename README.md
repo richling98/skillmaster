@@ -19,7 +19,7 @@ flowchart LR
   codexAgents["Codex<br/>~/.agents/skills"]
   codexHome["Codex home<br/>~/.codex/skills"]
   brain["Your local skills brain<br/>Master folder"]
-  library["Shareable local library<br/>index.html"]
+  library["Shareable local website<br/>index.html"]
 
   claude <--> brain
   codexAgents <--> brain

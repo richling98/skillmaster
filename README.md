@@ -122,7 +122,25 @@ Default: /Users/you/skills
 
 Do not type `default`. Do not type a relative path like `skills`.
 
-### 3. Open Your Skills Library
+### 3. What a Successful Install Looks Like
+
+After setup completes, you will see something like this:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✓  SkillMaster is ready!
+  ↳  Imported 12 skills, skipped 0, conflicts 0
+  ↳  Skills will now be auto-synced to Claude and Codex
+  ↳  Open your personal skills website: file:///Users/you/skills/index.html
+
+  You can now create skills anywhere in /Users/you/skills
+  and they will automatically sync to Claude Code and Codex!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+If you see a `conflicts` count greater than zero, your existing master copies were kept and the incoming skills were skipped.
+
+### 4. Open Your Skills Library
 
 Setup prints the path:
 

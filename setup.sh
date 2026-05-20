@@ -155,7 +155,8 @@ write_config_file "$CONFIG_FILE"
 
 ensure_skill_roots
 
-"$ROOT_DIR/scripts/bootstrap.sh" --yes
+BOOTSTRAP_SUMMARY=$("$ROOT_DIR/scripts/bootstrap.sh" --yes)
+printf '%s\n' "$BOOTSTRAP_SUMMARY"
 
 mkdir -p "$MASTER_DIR/add-new-skill" "$CLAUDE_SKILLS_DIR/add-new-skill"
 cp "$ROOT_DIR/skills/add-new-skill/SKILL.md" "$MASTER_DIR/add-new-skill/SKILL.md"
@@ -184,3 +185,24 @@ cat <<EOF
 Skill library: $MASTER_DIR/index.html
 Config: $CONFIG_FILE
 EOF
+
+GREEN='\033[1;32m'
+RESET='\033[0m'
+
+CONFLICT_COUNT=$(printf '%s' "$BOOTSTRAP_SUMMARY" | grep -oE 'conflicts [0-9]+' | grep -oE '[0-9]+' || true)
+CONFLICT_COUNT="${CONFLICT_COUNT:-0}"
+
+if [[ "$CONFLICT_COUNT" -gt 0 ]]; then
+  SKILLS_SUMMARY="${BOOTSTRAP_SUMMARY} (conflicts kept your existing master copies)"
+else
+  SKILLS_SUMMARY="$BOOTSTRAP_SUMMARY"
+fi
+
+printf "\n${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n"
+printf "${GREEN}  ✓  SkillMaster is ready!${RESET}\n"
+printf "${GREEN}  ↳  ${SKILLS_SUMMARY}${RESET}\n"
+printf "${GREEN}  ↳  Skills will now be auto-synced to Claude and Codex${RESET}\n"
+printf "${GREEN}  ↳  Open your personal skills website: file://$MASTER_DIR/index.html${RESET}\n"
+printf "${GREEN}\n  You can now create skills anywhere in $MASTER_DIR${RESET}\n"
+printf "${GREEN}  and they will automatically sync to Claude Code and Codex!${RESET}\n"
+printf "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n\n"
